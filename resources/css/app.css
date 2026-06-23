@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    }
+}
+
+/* Ant Design sidebar dark theme fixes */
+.ant-menu-dark .ant-menu-item-selected {
+    background-color: rgba(16, 185, 129, 0.2) !important;
+}
+
+.ant-menu-dark .ant-menu-item:hover,
+.ant-menu-dark .ant-menu-submenu-title:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.ant-menu-dark.ant-menu-inline .ant-menu-sub {
+    background: rgba(0, 0, 0, 0.15) !important;
+}
