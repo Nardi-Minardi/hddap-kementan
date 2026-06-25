@@ -26,6 +26,34 @@ Route::get('/', function () {
     ]);
 });
 
+Route::get('/vercel-debug', function () {
+    if (! config('app.debug')) {
+        abort(404);
+    }
+
+    try {
+        \Illuminate\Support\Facades\DB::connection()->getPdo();
+        $dbStatus = 'connected';
+    } catch (\Throwable $e) {
+        $dbStatus = 'failed: '.$e->getMessage();
+    }
+
+    return response()->json([
+        'app_env' => config('app.env'),
+        'app_debug' => config('app.debug'),
+        'app_key_set' => filled(config('app.key')),
+        'app_url' => config('app.url'),
+        'vercel' => (bool) env('VERCEL'),
+        'db_default' => config('database.default'),
+        'db_status' => $dbStatus,
+        'session_driver' => config('session.driver'),
+        'cache_store' => config('cache.default'),
+        'storage_path' => storage_path(),
+        'storage_writable' => is_writable(storage_path()),
+        'views_path' => config('view.compiled'),
+    ]);
+});
+
 Route::get('/statistik', [StatistikController::class, 'index'])->name('statistik');
 
 Route::middleware(['auth', 'verified'])->group(function () {
