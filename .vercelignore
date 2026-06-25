@@ -1,0 +1,17 @@
+/vendor
+/node_modules
+.env
+.env.*
+!.env.example
+/storage/logs
+/storage/framework/cache/data
+/storage/framework/sessions
+/storage/framework/views
+/tests
+.phpunit.result.cache
+.phpunit.cache
+/public/hot
+/public/storage
+.git
+.idea
+.vscode
