@@ -44,4 +44,11 @@ return [
         'instagram_url' => env('SOCIAL_INSTAGRAM_URL'),
     ],
 
+    'videos' => [
+        'hero_1' => env('VIDEO_HERO_1_URL', '/videos/hero-1.mp4'),
+        'hero_2' => env('VIDEO_HERO_2_URL', '/videos/hero-2.mp4'),
+        'hero_3' => env('VIDEO_HERO_3_URL', '/videos/hero-3.mp4'),
+        'ai_tani' => env('VIDEO_AI_TANI_URL', '/videos/ai-tani-menyapa.mp4'),
+    ],
+
 ];

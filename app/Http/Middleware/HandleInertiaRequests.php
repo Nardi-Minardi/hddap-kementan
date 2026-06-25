@@ -42,6 +42,14 @@ class HandleInertiaRequests extends Middleware
                 'youtube'   => config('services.social.youtube_url'),
                 'instagram' => config('services.social.instagram_url'),
             ],
+            'videos' => [
+                'hero' => [
+                    config('services.videos.hero_1'),
+                    config('services.videos.hero_2'),
+                    config('services.videos.hero_3'),
+                ],
+                'aiTani' => config('services.videos.ai_tani'),
+            ],
         ];
     }
 }

@@ -1,12 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useState, useEffect, useRef } from 'react';
 
-const heroVideos = [
-    '/videos/hero-1.mp4',
-    '/videos/hero-2.mp4',
-    '/videos/hero-3.mp4',
-];
-
 const aiTaniStats = [
     { label: 'Total Petani Terdaftar', value: '1.248.390', color: 'text-green-300' },
     { label: 'Kelompok Tani Aktif', value: '84.720', color: 'text-emerald-300' },
@@ -14,7 +8,9 @@ const aiTaniStats = [
 ];
 
 export default function Welcome({ auth, canLogin, canRegister }) {
-    const { social } = usePage().props;
+    const { social, videos } = usePage().props;
+    const heroVideos = videos?.hero ?? [];
+    const aiTaniVideoUrl = videos?.aiTani ?? '/videos/ai-tani-menyapa.mp4';
     const [scrolled, setScrolled] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     const [aiTaniModalOpen, setAiTaniModalOpen] = useState(false);
@@ -51,7 +47,7 @@ export default function Welcome({ auth, canLogin, canRegister }) {
                 video.currentTime = 0;
             }
         });
-    }, [activeHeroSlide]);
+    }, [activeHeroSlide, heroVideos.length]);
 
     const goToHeroSlide = (index) => {
         setActiveHeroSlide(index);
@@ -674,7 +670,7 @@ export default function Welcome({ auth, canLogin, canRegister }) {
                     >
                         <video
                             ref={aiTaniVideoRef}
-                            src="/videos/ai-tani-menyapa.mp4"
+                            src={aiTaniVideoUrl}
                             className="h-full w-full object-cover"
                             playsInline
                             preload="auto"
