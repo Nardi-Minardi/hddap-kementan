@@ -7,7 +7,7 @@
     "functions": {
         "api/index.php": {
             "runtime": "vercel-php@0.7.4",
-            "excludeFiles": "{public/**,node_modules/**,tests/**,storage/**,database/**,resources/js/**,resources/css/**,.github/**,vendor/**/tests/**,vendor/**/docs/**}",
+            "excludeFiles": "{public/videos/**,public/images/**,node_modules/**,tests/**,storage/**,database/**,resources/js/**,resources/css/**,.github/**,vendor/**/tests/**,vendor/**/docs/**}",
             "memory": 1024,
             "maxDuration": 30
         }
