@@ -165,7 +165,7 @@ export default function Welcome({ auth, canLogin, canRegister }) {
 
     return (
         <>
-            <Head title="Sistem Informasi Pertanian — Kementan RI" />
+            <Head title="Horticulture Development in Dryland Areas Project — Kementan RI" />
             <div className="min-h-screen bg-white font-sans antialiased">
 
                 {/* ── Navbar ── */}
@@ -372,9 +372,9 @@ export default function Welcome({ auth, canLogin, canRegister }) {
 
                     <div className="relative z-10 w-full px-4 py-32 sm:px-6 lg:px-16">
                         <div className="max-w-3xl text-center lg:text-left">
-                            <span className="inline-flex items-center gap-2 rounded-full border border-green-400/30 bg-green-400/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-green-300">
+                            <span className="inline-flex items-center gap-2 rounded-full border border-green-400/30 bg-green-400/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-green-300">
                                 <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
-                                Sistem Informasi Terpadu
+                                Horticulture Development in Dryland Areas Project
                             </span>
                             <h1 className="mt-6 text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
                                 Digitalisasi Data
@@ -548,7 +548,7 @@ export default function Welcome({ auth, canLogin, canRegister }) {
                             <span className="block text-green-300">Indonesia dengan lebih baik</span>
                         </h2>
                         <p className="mt-5 text-lg text-green-100/80">
-                            Bergabunglah bersama ribuan petugas pertanian di seluruh Indonesia yang telah menggunakan SIPERTAN untuk mewujudkan pertanian yang modern dan berdaya saing.
+                            Bergabunglah bersama ribuan petugas pertanian di seluruh Indonesia yang telah menggunakan Horticulture Development in Dryland Areas Project untuk mewujudkan pertanian yang modern dan berdaya saing.
                         </p>
                         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
                             {auth.user ? (
@@ -599,7 +599,7 @@ export default function Welcome({ auth, canLogin, canRegister }) {
                             </div>
                             HDDAP
                         </div>
-                        <p>Sistem Informasi Pertanian — Kementerian Pertanian Republik Indonesia</p>
+                        <p>Horticulture Development in Dryland Areas Project — Kementerian Pertanian Republik Indonesia</p>
                         {(social?.youtube || social?.instagram) && (
                             <div className="flex items-center justify-center gap-4">
                                 {social?.youtube && (

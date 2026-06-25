@@ -8,7 +8,7 @@
             </div>
             HDDAP
         </div>
-        <p>Sistem Informasi Pertanian — Kementerian Pertanian Republik Indonesia</p>
+        <p>Horticulture Development in Dryland Areas Project — Kementerian Pertanian Republik Indonesia</p>
 
         @if (config('services.social.youtube_url') || config('services.social.instagram_url'))
             <div class="flex items-center justify-center gap-4">
