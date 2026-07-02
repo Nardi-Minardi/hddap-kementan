@@ -13,11 +13,13 @@ class PasswordUpdateTest extends TestCase
 
     public function test_password_can_be_updated(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'role_id' => \App\Models\Role::create(['name' => 'admin', 'label' => 'Administrator'])->id,
+        ]);
 
         $response = $this
             ->actingAs($user)
-            ->from('/profile')
+            ->from('/admin/profile')
             ->put('/password', [
                 'current_password' => 'password',
                 'password' => 'new-password',
@@ -26,7 +28,7 @@ class PasswordUpdateTest extends TestCase
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertRedirect('/admin/profile');
 
         $this->assertTrue(Hash::check('new-password', $user->refresh()->password));
     }
@@ -37,7 +39,7 @@ class PasswordUpdateTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->from('/profile')
+            ->from('/admin/profile')
             ->put('/password', [
                 'current_password' => 'wrong-password',
                 'password' => 'new-password',
@@ -46,6 +48,6 @@ class PasswordUpdateTest extends TestCase
 
         $response
             ->assertSessionHasErrors('current_password')
-            ->assertRedirect('/profile');
+            ->assertRedirect('/admin/profile');
     }
 }

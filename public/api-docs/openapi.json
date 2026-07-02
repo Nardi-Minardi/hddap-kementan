@@ -1,0 +1,342 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "HDDAP Kementan API",
+    "version": "1.0.0",
+    "description": "Dokumentasi API HDDAP — Kementerian Pertanian RI.\n\n**Base URL:** `/api`\n\n**Format response:** `status_code`, `message`, `data`, `meta` (snake_case).\n\n**Pagination:** `limit` (default 10, maks 100), `offset` (default 0).\n\n**Sorting & search:** `search`, `order_by` (default `id`), `order_direction` (`asc` / `desc`).\n\n**Error 422:** `meta.errors` berisi detail validasi."
+  },
+  "servers": [
+    {
+      "url": "/api",
+      "description": "Server API HDDAP"
+    }
+  ],
+  "paths": {
+    "/logframe": {
+      "get": {
+        "summary": "List Logframe",
+        "description": "Mengembalikan daftar indikator logframe. Mendukung pencarian, pagination, dan sorting.",
+        "operationId": "getLogframeList",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Kata kunci pencarian di semua kolom teks logframe",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 255,
+              "nullable": true
+            },
+            "example": "petani"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Jumlah data per halaman (maksimum 100)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            },
+            "example": 5
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Posisi awal data untuk pagination",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "example": 0
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "description": "Kolom pengurutan data",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "id",
+              "enum": [
+                "id",
+                "tingkat",
+                "nama_indikator",
+                "definisi_indikator",
+                "nilai_dasar",
+                "target_pertengahan_proyek",
+                "target_akhir_proyek",
+                "realisasi",
+                "created_at",
+                "updated_at"
+              ]
+            },
+            "example": "id"
+          },
+          {
+            "name": "order_direction",
+            "in": "query",
+            "description": "Arah pengurutan: ascending atau descending",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "asc",
+              "enum": ["asc", "desc"]
+            },
+            "example": "asc"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Berhasil — daftar logframe dikembalikan dalam field `data`, informasi pagination di `meta`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogframeListResponse"
+                },
+                "examples": {
+                  "success": {
+                    "summary": "Response sukses",
+                    "value": {
+                      "status_code": 200,
+                      "message": "Success",
+                      "data": [
+                        {
+                          "id": 1,
+                          "tingkat": "Jangkauan",
+                          "nama_indikator": "Jumlah petani yang didukung oleh proyek",
+                          "definisi_indikator": "Jumlah petani yang tercatat dalam sistem dan mendapat manfaat program.",
+                          "nilai_dasar": "0",
+                          "target_pertengahan_proyek": "12.500 dengan 50% perempuan dan 20% pemuda",
+                          "target_akhir_proyek": "25.000 dengan 50% perempuan dan 20% pemuda",
+                          "realisasi": null,
+                          "created_at": "2026-06-25",
+                          "updated_at": "2026-06-25"
+                        }
+                      ],
+                      "meta": {
+                        "total": 7,
+                        "limit": 5,
+                        "offset": 0,
+                        "order_by": "id",
+                        "order_direction": "asc",
+                        "search": null
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validasi gagal — parameter request tidak memenuhi aturan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                },
+                "examples": {
+                  "validation_error": {
+                    "summary": "Parameter tidak valid",
+                    "value": {
+                      "status_code": 422,
+                      "message": "Validasi gagal.",
+                      "data": null,
+                      "meta": {
+                        "errors": {
+                          "limit": ["The limit field must be at least 1."]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "LogframeItem": {
+        "type": "object",
+        "description": "Satu record indikator logframe",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "ID unik record",
+            "example": 1
+          },
+          "tingkat": {
+            "type": "string",
+            "nullable": true,
+            "description": "Tingkat indikator (mis. Jangkauan, Outcome)",
+            "example": "Jangkauan"
+          },
+          "nama_indikator": {
+            "type": "string",
+            "nullable": true,
+            "description": "Nama indikator logframe",
+            "example": "Jumlah petani yang didukung oleh proyek"
+          },
+          "definisi_indikator": {
+            "type": "string",
+            "nullable": true,
+            "description": "Definisi operasional indikator"
+          },
+          "nilai_dasar": {
+            "type": "string",
+            "nullable": true,
+            "description": "Nilai dasar (baseline)",
+            "example": "0"
+          },
+          "target_pertengahan_proyek": {
+            "type": "string",
+            "nullable": true,
+            "description": "Target pada pertengahan proyek"
+          },
+          "target_akhir_proyek": {
+            "type": "string",
+            "nullable": true,
+            "description": "Target pada akhir proyek"
+          },
+          "realisasi": {
+            "type": "string",
+            "nullable": true,
+            "description": "Nilai realisasi capaian"
+          },
+          "component": {
+            "type": "string",
+            "nullable": true,
+            "description": "Komponen indikator"
+          },
+          "sumber_data": {
+            "type": "string",
+            "nullable": true,
+            "description": "Sumber data indikator"
+          },
+          "data_yg_dikumpulkan": {
+            "type": "string",
+            "nullable": true,
+            "description": "Data yang dikumpulkan"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "description": "Tanggal dibuat (format YYYY-MM-DD)",
+            "example": "2026-06-25"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "description": "Tanggal diperbarui (format YYYY-MM-DD)",
+            "example": "2026-06-25"
+          }
+        }
+      },
+      "LogframeListMeta": {
+        "type": "object",
+        "description": "Metadata pagination dan filter",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "description": "Total record yang cocok dengan filter",
+            "example": 7
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Limit yang digunakan",
+            "example": 10
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Offset yang digunakan",
+            "example": 0
+          },
+          "order_by": {
+            "type": "string",
+            "description": "Kolom sort aktif",
+            "example": "id"
+          },
+          "order_direction": {
+            "type": "string",
+            "enum": ["asc", "desc"],
+            "description": "Arah sort aktif",
+            "example": "asc"
+          },
+          "search": {
+            "type": "string",
+            "nullable": true,
+            "description": "Kata kunci pencarian aktif",
+            "example": null
+          }
+        }
+      },
+      "LogframeListResponse": {
+        "type": "object",
+        "description": "Response standar daftar logframe",
+        "properties": {
+          "status_code": {
+            "type": "integer",
+            "example": 200
+          },
+          "message": {
+            "type": "string",
+            "example": "Success"
+          },
+          "data": {
+            "type": "array",
+            "description": "Array record logframe",
+            "items": {
+              "$ref": "#/components/schemas/LogframeItem"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/LogframeListMeta"
+          }
+        }
+      },
+      "ValidationErrorResponse": {
+        "type": "object",
+        "description": "Response error validasi (HTTP 422)",
+        "properties": {
+          "status_code": {
+            "type": "integer",
+            "example": 422
+          },
+          "message": {
+            "type": "string",
+            "example": "Validasi gagal."
+          },
+          "data": {
+            "nullable": true,
+            "example": null
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "errors": {
+                "type": "object",
+                "description": "Detail error per field",
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

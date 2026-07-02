@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
@@ -23,6 +24,12 @@ class RoleMiddleware
             if ($request->user()->hasRole($role)) {
                 return $next($request);
             }
+        }
+
+        if ($request->expectsJson() || $request->header('X-Inertia')) {
+            return Inertia::render('Errors/403')
+                ->toResponse($request)
+                ->setStatusCode(403);
         }
 
         abort(403, 'Unauthorized. Insufficient role.');

@@ -16,6 +16,8 @@ import {
     ShopOutlined,
     ReadOutlined,
     LineChartOutlined,
+    TableOutlined,
+    HistoryOutlined,
     GlobalOutlined,
     EnvironmentOutlined,
     HomeOutlined,
@@ -33,9 +35,9 @@ export default function AdminLayout({ children, title }) {
 
     const menuItems = [
         {
-            key: '/dashboard',
+            key: '/admin/dashboard',
             icon: <DashboardOutlined />,
-            label: <Link href={route('dashboard')}>Dashboard</Link>,
+            label: <Link href={route('admin.dashboard')}>Dashboard</Link>,
         },
         {
             key: 'wilayah',
@@ -116,6 +118,16 @@ export default function AdminLayout({ children, title }) {
             icon: <LineChartOutlined />,
             label: <Link href={route('admin.monev-fisik.index')}>Monev Fisik</Link>,
         },
+        {
+            key: '/admin/logframe',
+            icon: <TableOutlined />,
+            label: <Link href={route('admin.logframe.index')}>Logframe</Link>,
+        },
+        {
+            key: '/admin/activity-log',
+            icon: <HistoryOutlined />,
+            label: <Link href={route('admin.activity-log.index')}>Activity Log</Link>,
+        },
     ];
 
     const getSelectedKeys = () => {
@@ -133,7 +145,11 @@ export default function AdminLayout({ children, title }) {
         if (pathname.startsWith('/admin/koperasi')) return ['/admin/koperasi'];
         if (pathname.startsWith('/admin/bintek')) return ['/admin/bintek'];
         if (pathname.startsWith('/admin/monev-fisik')) return ['/admin/monev-fisik'];
-        return ['/dashboard'];
+        if (pathname.startsWith('/admin/logframe')) return ['/admin/logframe'];
+        if (pathname.startsWith('/admin/activity-log')) return ['/admin/activity-log'];
+        if (pathname.startsWith('/admin/profile')) return ['/admin/profile'];
+        if (pathname.startsWith('/admin/dashboard')) return ['/admin/dashboard'];
+        return ['/admin/dashboard'];
     };
 
     const getOpenKeys = () => {
@@ -150,7 +166,7 @@ export default function AdminLayout({ children, title }) {
         {
             key: 'profile',
             icon: <SettingOutlined />,
-            label: <Link href={route('profile.edit')}>Profile</Link>,
+            label: <Link href={route('admin.profile.edit')}>Profile</Link>,
         },
         { type: 'divider' },
         {
@@ -172,8 +188,8 @@ export default function AdminLayout({ children, title }) {
                 collapsible
                 collapsed={collapsed}
                 width={240}
-                className="!bg-gradient-to-b !from-slate-900 !to-slate-800 shadow-2xl"
-                style={{ position: 'sticky', top: 0, height: '100vh', overflowY: 'auto' }}
+                className="!bg-gradient-to-b !from-slate-900 !to-slate-800 shadow-2xl !self-stretch"
+                style={{ minHeight: '100vh', height: 'auto' }}
             >
                 {/* Logo */}
                 <Link

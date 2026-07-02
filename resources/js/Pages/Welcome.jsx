@@ -1,5 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
+import BeritaSwiper from '@/Components/BeritaSwiper';
 
 const aiTaniStats = [
     { label: 'Total Petani Terdaftar', value: '1.248.390', color: 'text-green-300' },
@@ -7,7 +9,42 @@ const aiTaniStats = [
     { label: 'Kabupaten/Kota Tercover', value: '514', color: 'text-teal-300' },
 ];
 
-export default function Welcome({ auth, canLogin, canRegister }) {
+const navItems = [
+    { label: 'Beranda', href: '#beranda' },
+    { label: 'Fitur', href: '#fitur' },
+    { label: 'Berita', href: '#berita' },
+    { label: 'Logframe', href: '/logframe', external: true },
+    { label: 'Statistik', href: '/statistik', external: true },
+    { label: 'Tentang', href: '#tentang' },
+];
+
+const featureHeaderVariants = {
+    hidden: { opacity: 0, y: 28 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.6, ease: 'easeOut' },
+    },
+};
+
+const featureGridVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { staggerChildren: 0.12, delayChildren: 0.15 },
+    },
+};
+
+const featureCardVariants = {
+    hidden: { opacity: 0, y: 36 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.5, ease: 'easeOut' },
+    },
+};
+
+export default function Welcome({ auth, canLogin, canRegister, berita = [] }) {
     const { social, videos } = usePage().props;
     const heroVideos = videos?.hero ?? [];
     const aiTaniVideoUrl = videos?.aiTani ?? '/videos/ai-tani-menyapa.mp4';
@@ -16,6 +53,7 @@ export default function Welcome({ auth, canLogin, canRegister }) {
     const [aiTaniModalOpen, setAiTaniModalOpen] = useState(false);
     const [showAiTaniStats, setShowAiTaniStats] = useState(false);
     const [activeHeroSlide, setActiveHeroSlide] = useState(0);
+    const [activeSection, setActiveSection] = useState('beranda');
     const aiTaniVideoRef = useRef(null);
     const heroVideoRefs = useRef([]);
 
@@ -26,9 +64,14 @@ export default function Welcome({ auth, canLogin, canRegister }) {
     }, []);
 
     useEffect(() => {
-        document.body.style.overflow = menuOpen ? 'hidden' : '';
+        if (menuOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.removeProperty('overflow');
+        }
+
         return () => {
-            document.body.style.overflow = '';
+            document.body.style.removeProperty('overflow');
         };
     }, [menuOpen]);
 
@@ -48,6 +91,61 @@ export default function Welcome({ auth, canLogin, canRegister }) {
             }
         });
     }, [activeHeroSlide, heroVideos.length]);
+
+    useEffect(() => {
+        const sectionIds = navItems
+            .filter((item) => item.href.startsWith('#'))
+            .map((item) => item.href.slice(1));
+
+        const sections = sectionIds
+            .map((id) => document.getElementById(id))
+            .filter(Boolean);
+
+        if (sections.length === 0) {
+            return undefined;
+        }
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const visible = entries
+                    .filter((entry) => entry.isIntersecting)
+                    .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+
+                if (visible.length > 0) {
+                    setActiveSection(visible[0].target.id);
+                }
+            },
+            { rootMargin: '-45% 0px -45% 0px', threshold: [0, 0.25, 0.5, 0.75, 1] },
+        );
+
+        sections.forEach((section) => observer.observe(section));
+
+        return () => observer.disconnect();
+    }, []);
+
+    const isNavItemActive = (item) => item.href.startsWith('#') && activeSection === item.href.slice(1);
+
+    const getDesktopNavClass = (item) => {
+        const active = isNavItemActive(item);
+
+        if (scrolled) {
+            return active
+                ? 'border-green-600 text-green-700'
+                : 'border-transparent text-gray-600 hover:border-green-300 hover:text-green-600';
+        }
+
+        return active
+            ? 'border-green-400 text-white'
+            : 'border-transparent text-white/80 hover:border-green-300 hover:text-green-400';
+    };
+
+    const getMobileNavClass = (item) => {
+        const active = isNavItemActive(item);
+
+        return active
+            ? 'border-green-600 bg-green-50 text-green-700'
+            : 'border-transparent text-gray-700 hover:bg-green-50 hover:text-green-700';
+    };
 
     const goToHeroSlide = (index) => {
         setActiveHeroSlide(index);
@@ -152,17 +250,10 @@ export default function Welcome({ auth, canLogin, canRegister }) {
         { value: '99.9', label: 'Uptime Sistem', suffix: '%' },
     ];
 
-    const navItems = [
-        { label: 'Beranda', href: '#beranda' },
-        { label: 'Fitur', href: '#fitur' },
-        { label: 'Statistik', href: '/statistik', external: true },
-        { label: 'Tentang', href: '#tentang' },
-    ];
-
     return (
         <>
             <Head title="Horticulture Development in Dryland Areas Project — Kementan RI" />
-            <div className="min-h-screen bg-white font-sans antialiased">
+            <div className="min-h-screen overflow-x-clip bg-white font-sans antialiased">
 
                 {/* ── Navbar ── */}
                 <nav
@@ -198,21 +289,19 @@ export default function Welcome({ auth, canLogin, canRegister }) {
                                         <a
                                             key={item.label}
                                             href={item.href}
-                                            className={`text-sm font-medium transition hover:text-green-400 ${
-                                                scrolled ? 'text-gray-600' : 'text-white/80'
-                                            }`}
+                                            className={`inline-flex h-10 items-center border-b-2 text-sm font-medium transition ${getDesktopNavClass(item)}`}
                                         >
                                             {item.label}
                                         </a>
                                     ))}
                                 </div>
 
-                                <div className="flex items-center gap-3">
-                                    <div className="hidden lg:flex items-center gap-3">
+                                <div className="flex shrink-0 items-center gap-2">
+                                    <div className="hidden items-center gap-2 lg:flex">
                                         {auth.user ? (
                                             <Link
                                                 href={route('dashboard')}
-                                                className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700"
+                                                className="inline-flex h-10 items-center justify-center rounded-lg bg-green-600 px-4 text-sm font-semibold leading-none text-white shadow-sm transition hover:bg-green-700"
                                             >
                                                 Dashboard
                                             </Link>
@@ -221,8 +310,10 @@ export default function Welcome({ auth, canLogin, canRegister }) {
                                                 {canLogin && (
                                                     <Link
                                                         href={route('login')}
-                                                        className={`text-sm font-medium transition ${
-                                                            scrolled ? 'text-gray-700 hover:text-green-700' : 'text-white/90 hover:text-white'
+                                                        className={`inline-flex h-10 items-center justify-center rounded-lg border px-4 text-sm font-semibold leading-none transition ${
+                                                            scrolled
+                                                                ? 'border-gray-200 text-gray-700 hover:border-green-200 hover:bg-green-50 hover:text-green-700'
+                                                                : 'border-white/30 text-white hover:bg-white/10'
                                                         }`}
                                                     >
                                                         Masuk
@@ -231,7 +322,7 @@ export default function Welcome({ auth, canLogin, canRegister }) {
                                                 {canRegister && (
                                                     <Link
                                                         href={route('register')}
-                                                        className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700"
+                                                        className="inline-flex h-10 items-center justify-center rounded-lg bg-green-600 px-4 text-sm font-semibold leading-none text-white shadow-sm transition hover:bg-green-700"
                                                     >
                                                         Daftar
                                                     </Link>
@@ -241,105 +332,105 @@ export default function Welcome({ auth, canLogin, canRegister }) {
                                     </div>
 
                                     {/* Mobile menu toggle */}
-                                    <button
-                                        className="ml-1 lg:hidden"
-                                        onClick={() => setMenuOpen(!menuOpen)}
-                                        aria-label="Toggle menu"
-                                    >
-                                        <svg className={`h-6 w-6 ${scrolled ? 'text-gray-700' : 'text-white'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            {menuOpen
-                                                ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                                : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                                            }
-                                        </svg>
-                                    </button>
+                                    {!menuOpen && (
+                                        <button
+                                            type="button"
+                                            className="ml-1 lg:hidden"
+                                            onClick={() => setMenuOpen(true)}
+                                            aria-label="Buka menu"
+                                        >
+                                            <svg className={`h-6 w-6 ${scrolled ? 'text-gray-700' : 'text-white'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                            </svg>
+                                        </button>
+                                    )}
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <div
-                        className={`fixed inset-0 z-[55] bg-black/50 transition-opacity duration-300 lg:hidden ${
-                            menuOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
-                        }`}
-                        onClick={() => setMenuOpen(false)}
-                        aria-hidden={!menuOpen}
-                    />
-
-                    <div
-                        className={`fixed left-0 top-0 z-[60] flex h-full w-72 max-w-[85vw] flex-col bg-white shadow-2xl transition-transform duration-300 ease-out lg:hidden ${
-                            menuOpen ? 'translate-x-0' : 'pointer-events-none -translate-x-full'
-                        }`}
-                        aria-hidden={!menuOpen}
-                    >
-                        <div className="flex h-16 items-center justify-between border-b border-gray-100 px-4">
-                            <div className="flex items-center gap-3">
-                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-600">
-                                    <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <p className="text-sm font-bold text-gray-900">HDDAP</p>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => setMenuOpen(false)}
-                                aria-label="Tutup menu"
-                                className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-600 transition hover:bg-gray-100"
-                            >
-                                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <nav className="flex-1 overflow-y-auto px-4 py-4">
-                            {navItems.map((item) => (
-                                <a
-                                    key={item.label}
-                                    href={item.href}
-                                    className="block rounded-lg px-3 py-3 text-sm font-medium text-gray-700 transition hover:bg-green-50 hover:text-green-700"
-                                    onClick={() => setMenuOpen(false)}
-                                >
-                                    {item.label}
-                                </a>
-                            ))}
-                        </nav>
-
-                        <div className="space-y-2 border-t border-gray-100 px-4 py-4">
-                            {auth.user ? (
-                                <Link
-                                    href={route('dashboard')}
-                                    className="block rounded-lg bg-green-600 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-green-700"
-                                    onClick={() => setMenuOpen(false)}
-                                >
-                                    Dashboard
-                                </Link>
-                            ) : (
-                                <>
-                                    {canLogin && (
-                                        <Link
-                                            href={route('login')}
-                                            className="block rounded-lg border border-gray-200 px-4 py-2.5 text-center text-sm font-medium text-gray-700 transition hover:border-green-200 hover:bg-green-50 hover:text-green-700"
-                                            onClick={() => setMenuOpen(false)}
-                                        >
-                                            Masuk
-                                        </Link>
-                                    )}
-                                    {canRegister && (
-                                        <Link
-                                            href={route('register')}
-                                            className="block rounded-lg bg-green-600 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-green-700"
-                                            onClick={() => setMenuOpen(false)}
-                                        >
-                                            Daftar
-                                        </Link>
-                                    )}
-                                </>
-                            )}
                         </div>
                     </div>
                 </nav>
+
+                <div
+                    className={`fixed inset-0 z-[55] bg-black/50 transition-opacity duration-300 lg:hidden ${
+                        menuOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
+                    }`}
+                    onClick={() => setMenuOpen(false)}
+                    aria-hidden={!menuOpen}
+                />
+
+                <div
+                    className={`fixed inset-y-0 left-0 z-[60] flex h-dvh w-72 max-w-[85vw] flex-col bg-white shadow-2xl transition-transform duration-300 ease-out lg:hidden ${
+                        menuOpen ? 'translate-x-0' : 'pointer-events-none -translate-x-full'
+                    }`}
+                    aria-hidden={!menuOpen}
+                >
+                    <div className="flex h-16 shrink-0 items-center justify-between border-b border-gray-100 px-4">
+                        <div className="flex items-center gap-3">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-600">
+                                <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <p className="text-sm font-bold text-gray-900">HDDAP</p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setMenuOpen(false)}
+                            aria-label="Tutup menu"
+                            className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-600 transition hover:bg-gray-100"
+                        >
+                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <nav className="flex-1 overflow-y-auto px-4 py-4">
+                        {navItems.map((item) => (
+                            <a
+                                key={item.label}
+                                href={item.href}
+                                className={`block rounded-lg border-b-2 px-3 py-3 text-sm font-medium transition ${getMobileNavClass(item)}`}
+                                onClick={() => setMenuOpen(false)}
+                            >
+                                {item.label}
+                            </a>
+                        ))}
+                    </nav>
+
+                    <div className="shrink-0 space-y-2 border-t border-gray-100 px-4 py-4">
+                        {auth.user ? (
+                            <Link
+                                href={route('dashboard')}
+                                className="block rounded-lg bg-green-600 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-green-700"
+                                onClick={() => setMenuOpen(false)}
+                            >
+                                Dashboard
+                            </Link>
+                        ) : (
+                            <>
+                                {canLogin && (
+                                    <Link
+                                        href={route('login')}
+                                        className="block rounded-lg border border-gray-200 px-4 py-2.5 text-center text-sm font-medium text-gray-700 transition hover:border-green-200 hover:bg-green-50 hover:text-green-700"
+                                        onClick={() => setMenuOpen(false)}
+                                    >
+                                        Masuk
+                                    </Link>
+                                )}
+                                {canRegister && (
+                                    <Link
+                                        href={route('register')}
+                                        className="block rounded-lg bg-green-600 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-green-700"
+                                        onClick={() => setMenuOpen(false)}
+                                    >
+                                        Daftar
+                                    </Link>
+                                )}
+                            </>
+                        )}
+                    </div>
+                </div>
 
                 {/* ── Hero ── */}
                 <section
@@ -363,7 +454,7 @@ export default function Welcome({ auth, canLogin, canRegister }) {
                                 onEnded={goToNextHeroSlide}
                             />
                         ))}
-                        <div className="absolute inset-0 bg-gradient-to-r from-green-950/90 via-green-900/75 to-green-900/50" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-black/15" />
                     </div>
 
                     <div className="relative z-10 w-full px-4 py-32 sm:px-6 lg:px-16">
@@ -373,13 +464,8 @@ export default function Welcome({ auth, canLogin, canRegister }) {
                                 Horticulture Development in Dryland Areas Project
                             </span>
                             <h1 className="mt-6 text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
-                                Digitalisasi Data
-                                <span className="block text-green-300">Pertanian Indonesia</span>
+                                Selamat <span className="text-green-300">Datang</span>
                             </h1>
-                            <p className="mt-6 text-lg leading-relaxed text-green-100/80">
-                                Platform pengelolaan data petani, kelompok tani, dan kartu keluarga petani
-                                secara terintegrasi untuk mendukung ketahanan pangan nasional.
-                            </p>
                             <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row lg:justify-start">
                                 {auth.user ? (
                                     <Link
@@ -504,7 +590,13 @@ export default function Welcome({ auth, canLogin, canRegister }) {
                     </button>
 
                     <div className="relative z-10 px-4 sm:px-6 lg:px-16">
-                        <div className="text-center lg:max-w-3xl lg:mx-auto">
+                        <motion.div
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: false, amount: 0.4 }}
+                            variants={featureHeaderVariants}
+                            className="text-center lg:max-w-3xl lg:mx-auto"
+                        >
                             <span className="text-xs font-bold uppercase tracking-widest text-green-600">Fitur Unggulan</span>
                             <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
                                 Semua yang Anda butuhkan<br className="hidden sm:block" /> dalam satu platform
@@ -512,12 +604,19 @@ export default function Welcome({ auth, canLogin, canRegister }) {
                             <p className="mt-4 text-base text-gray-500">
                                 Dirancang khusus untuk mendukung pengelolaan data sektor pertanian Indonesia secara efisien, akurat, dan terintegrasi.
                             </p>
-                        </div>
+                        </motion.div>
 
-                        <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 lg:pr-44 xl:pr-72">
+                        <motion.div
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: false, amount: 0.15 }}
+                            variants={featureGridVariants}
+                            className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 lg:pr-44 xl:pr-72"
+                        >
                             {features.map((f) => (
-                                <div
+                                <motion.div
                                     key={f.title}
+                                    variants={featureCardVariants}
                                     className="group relative overflow-hidden rounded-2xl bg-white/95 p-8 shadow-sm ring-1 ring-gray-200 backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:ring-green-500/30"
                                 >
                                     <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-green-50 text-green-600 transition group-hover:bg-green-600 group-hover:text-white">
@@ -526,11 +625,13 @@ export default function Welcome({ auth, canLogin, canRegister }) {
                                     <h3 className="mt-5 text-lg font-bold text-gray-900">{f.title}</h3>
                                     <p className="mt-2 text-sm leading-relaxed text-gray-500">{f.desc}</p>
                                     <div className="absolute bottom-0 left-0 h-0.5 w-0 bg-green-500 transition-all duration-300 group-hover:w-full" />
-                                </div>
+                                </motion.div>
                             ))}
-                        </div>
+                        </motion.div>
                     </div>
                 </section>
+
+                <BeritaSwiper items={berita} />
 
                 {/* ── CTA ── */}
                 <section id="tentang" className="relative overflow-hidden bg-gradient-to-br from-green-800 to-emerald-700 py-24">

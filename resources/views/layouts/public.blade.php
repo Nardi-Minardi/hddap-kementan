@@ -7,7 +7,7 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     @vite(['resources/css/app.css'])
 </head>
-<body class="min-h-screen bg-white font-sans antialiased">
+<body class="min-h-full overflow-x-hidden font-sans antialiased">
     @include('partials.public-navbar')
 
     @yield('content')
