@@ -25,6 +25,8 @@
     },
     "dependencies": {
         "@ant-design/icons": "^6.1.1",
-        "antd": "^6.3.5"
+        "antd": "^6.3.5",
+        "framer-motion": "^12.42.0",
+        "swiper": "^14.0.1"
     }
 }

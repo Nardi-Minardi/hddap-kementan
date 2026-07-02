@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="160" viewBox="0 0 480 160" fill="none">
+  <rect width="480" height="160" fill="#f9fafb"/>
+  <path
+    d="M0 72C40 48 80 96 120 72C160 48 200 24 240 72C280 120 320 96 360 72C400 48 440 56 480 72"
+    stroke="#bbf7d0"
+    stroke-width="2"
+    opacity="0.9"
+  />
+  <path
+    d="M0 96C40 72 80 120 120 96C160 72 200 48 240 96C280 144 320 120 360 96C400 72 440 80 480 96"
+    stroke="#86efac"
+    stroke-width="1.5"
+    opacity="0.65"
+  />
+  <path
+    d="M0 118C40 94 80 142 120 118C160 94 200 70 240 118C280 166 320 142 360 118C400 94 440 102 480 118"
+    stroke="#6ee7b7"
+    stroke-width="1"
+    opacity="0.45"
+  />
+  <path
+    d="M0 140C60 120 120 160 180 140C240 120 300 100 360 140C420 180 450 150 480 140V160H0V140Z"
+    fill="#ecfdf5"
+    opacity="0.85"
+  />
+</svg>

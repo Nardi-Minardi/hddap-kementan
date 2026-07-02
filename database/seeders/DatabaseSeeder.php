@@ -16,17 +16,22 @@ class DatabaseSeeder extends Seeder
 
         User::create([
             'name'     => 'Super Admin',
-            'email'    => 'admin@kementan.go.id',
+            'email'    => 'admin@gmail.com',
             'password' => Hash::make('password'),
             'role_id'  => $adminRole->id,
         ]);
 
         User::create([
             'name'     => 'Regular User',
-            'email'    => 'user@kementan.go.id',
+            'email'    => 'user@gmail.com',
             'password' => Hash::make('password'),
             'role_id'  => $userRole->id,
         ]);
+
+        $this->call(BeritaSeeder::class);
+        $this->call(KelompokPetaniSeeder::class);
+        $this->call(PetaniSeeder::class);
+        $this->call(WilayahSeeder::class);
     }
 }
 

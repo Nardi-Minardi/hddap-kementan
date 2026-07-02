@@ -2,6 +2,8 @@
     $navItems = [
         ['label' => 'Beranda', 'href' => url('/#beranda')],
         ['label' => 'Fitur', 'href' => url('/#fitur')],
+        ['label' => 'Berita', 'href' => url('/#berita')],
+        ['label' => 'Logframe', 'href' => route('logframe'), 'active' => request()->routeIs('logframe')],
         ['label' => 'Statistik', 'href' => route('statistik'), 'active' => request()->routeIs('statistik')],
         ['label' => 'Tentang', 'href' => url('/#tentang')],
     ];
@@ -27,29 +29,29 @@
                     @foreach ($navItems as $item)
                         <a
                             href="{{ $item['href'] }}"
-                            class="text-sm font-medium transition hover:text-green-600 {{ !empty($item['active']) ? 'text-green-700' : 'text-gray-600' }}"
+                            class="inline-flex h-10 items-center border-b-2 text-sm font-medium transition hover:border-green-300 hover:text-green-600 {{ !empty($item['active']) ? 'border-green-600 text-green-700' : 'border-transparent text-gray-600' }}"
                         >
                             {{ $item['label'] }}
                         </a>
                     @endforeach
                 </div>
 
-                <div class="flex items-center gap-3">
+                <div class="flex shrink-0 items-center gap-2">
                     @auth
                         <a
                             href="{{ route('dashboard') }}"
-                            class="hidden lg:inline-flex rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700"
+                            class="hidden h-10 items-center justify-center rounded-lg bg-green-600 px-4 text-sm font-semibold leading-none text-white shadow-sm transition hover:bg-green-700 lg:inline-flex"
                         >
                             Dashboard
                         </a>
                     @else
                         @if (Route::has('login'))
-                            <a href="{{ route('login') }}" class="hidden lg:inline text-sm font-medium text-gray-700 transition hover:text-green-700">
+                            <a href="{{ route('login') }}" class="hidden h-10 items-center justify-center rounded-lg border border-gray-200 px-4 text-sm font-semibold leading-none text-gray-700 transition hover:border-green-200 hover:bg-green-50 hover:text-green-700 lg:inline-flex">
                                 Masuk
                             </a>
                         @endif
                         @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="hidden lg:inline-flex rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700">
+                            <a href="{{ route('register') }}" class="hidden h-10 items-center justify-center rounded-lg bg-green-600 px-4 text-sm font-semibold leading-none text-white shadow-sm transition hover:bg-green-700 lg:inline-flex">
                                 Daftar
                             </a>
                         @endif
@@ -108,7 +110,7 @@
         @foreach ($navItems as $item)
             <a
                 href="{{ $item['href'] }}"
-                class="block rounded-lg px-3 py-3 text-sm font-medium transition hover:bg-green-50 hover:text-green-700 {{ !empty($item['active']) ? 'bg-green-50 text-green-700' : 'text-gray-700' }}"
+                class="block rounded-lg border-b-2 px-3 py-3 text-sm font-medium transition hover:bg-green-50 hover:text-green-700 {{ !empty($item['active']) ? 'border-green-600 bg-green-50 text-green-700' : 'border-transparent text-gray-700' }}"
             >
                 {{ $item['label'] }}
             </a>

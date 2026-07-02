@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -10,31 +11,69 @@ class ProfileTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_profile_page_is_displayed(): void
+    protected function setUp(): void
     {
-        $user = User::factory()->create();
+        parent::setUp();
 
+        Role::create(['name' => 'admin', 'label' => 'Administrator']);
+        Role::create(['name' => 'user', 'label' => 'User']);
+    }
+
+    private function adminUser(): User
+    {
+        return User::factory()->create([
+            'role_id' => Role::where('name', 'admin')->value('id'),
+        ]);
+    }
+
+    private function regularUser(): User
+    {
+        return User::factory()->create([
+            'role_id' => Role::where('name', 'user')->value('id'),
+        ]);
+    }
+
+    public function test_admin_profile_page_is_displayed(): void
+    {
         $response = $this
-            ->actingAs($user)
-            ->get('/profile');
+            ->actingAs($this->adminUser())
+            ->get('/admin/profile');
+
+        $response->assertOk();
+    }
+
+    public function test_user_cannot_access_admin_profile(): void
+    {
+        $response = $this
+            ->actingAs($this->regularUser())
+            ->get('/admin/profile');
+
+        $response->assertForbidden();
+    }
+
+    public function test_user_profile_page_is_displayed(): void
+    {
+        $response = $this
+            ->actingAs($this->regularUser())
+            ->get('/user/profile');
 
         $response->assertOk();
     }
 
     public function test_profile_information_can_be_updated(): void
     {
-        $user = User::factory()->create();
+        $user = $this->adminUser();
 
         $response = $this
             ->actingAs($user)
-            ->patch('/profile', [
+            ->patch('/admin/profile', [
                 'name' => 'Test User',
                 'email' => 'test@example.com',
             ]);
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertRedirect('/admin/profile');
 
         $user->refresh();
 
@@ -45,29 +84,29 @@ class ProfileTest extends TestCase
 
     public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void
     {
-        $user = User::factory()->create();
+        $user = $this->adminUser();
 
         $response = $this
             ->actingAs($user)
-            ->patch('/profile', [
+            ->patch('/admin/profile', [
                 'name' => 'Test User',
                 'email' => $user->email,
             ]);
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertRedirect('/admin/profile');
 
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
 
     public function test_user_can_delete_their_account(): void
     {
-        $user = User::factory()->create();
+        $user = $this->adminUser();
 
         $response = $this
             ->actingAs($user)
-            ->delete('/profile', [
+            ->delete('/admin/profile', [
                 'password' => 'password',
             ]);
 
@@ -81,19 +120,37 @@ class ProfileTest extends TestCase
 
     public function test_correct_password_must_be_provided_to_delete_account(): void
     {
-        $user = User::factory()->create();
+        $user = $this->adminUser();
 
         $response = $this
             ->actingAs($user)
-            ->from('/profile')
-            ->delete('/profile', [
+            ->from('/admin/profile')
+            ->delete('/admin/profile', [
                 'password' => 'wrong-password',
             ]);
 
         $response
             ->assertSessionHasErrors('password')
-            ->assertRedirect('/profile');
+            ->assertRedirect('/admin/profile');
 
         $this->assertNotNull($user->fresh());
+    }
+
+    public function test_dashboard_redirects_admin_to_admin_dashboard(): void
+    {
+        $response = $this
+            ->actingAs($this->adminUser())
+            ->get('/dashboard');
+
+        $response->assertRedirect(route('admin.dashboard'));
+    }
+
+    public function test_dashboard_redirects_user_to_user_dashboard(): void
+    {
+        $response = $this
+            ->actingAs($this->regularUser())
+            ->get('/dashboard');
+
+        $response->assertRedirect(route('user.dashboard'));
     }
 }

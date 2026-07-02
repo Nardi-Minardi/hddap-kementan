@@ -1,7 +1,7 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import {
-    Table, Button, Space, Tag, Typography, Card, Input, Popconfirm, message, Breadcrumb,
+    Table, Button, Space, Tag, Typography, Card, Input, Popconfirm, message, Breadcrumb, Tooltip,
 } from 'antd';
 import {
     PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, UserOutlined, HomeOutlined,
@@ -22,6 +22,7 @@ export default function UsersIndex({ users, roles }) {
 
     const handleDelete = (id) => {
         router.delete(route('admin.users.destroy', id), {
+            preserveScroll: true,
             onSuccess: () => message.success('User berhasil dihapus.'),
         });
     };
@@ -79,30 +80,31 @@ export default function UsersIndex({ users, roles }) {
         },
         {
             title: 'Aksi',
-            key: 'actions',
-            width: 120,
+            key: 'action',
+            width: 90,
+            align: 'center',
             render: (_, record) => (
-                <Space>
-                    <Link href={route('admin.users.edit', record.id)}>
+                <Space size={4}>
+                    <Tooltip title="Edit">
                         <Button
-                            type="text"
+                            size="small"
+                            type="primary"
+                            ghost
                             icon={<EditOutlined />}
-                            className="text-blue-500 hover:!text-blue-700 hover:!bg-blue-50"
+                            onClick={() => router.visit(route('admin.users.edit', record.id))}
                         />
-                    </Link>
+                    </Tooltip>
                     <Popconfirm
-                        title="Hapus User"
-                        description="Apakah Anda yakin ingin menghapus user ini?"
-                        onConfirm={() => handleDelete(record.id)}
-                        okText="Ya"
+                        title="Hapus user ini?"
+                        description="Data yang dihapus tidak dapat dikembalikan."
+                        okText="Hapus"
+                        okType="danger"
                         cancelText="Batal"
-                        okButtonProps={{ danger: true }}
+                        onConfirm={() => handleDelete(record.id)}
                     >
-                        <Button
-                            type="text"
-                            icon={<DeleteOutlined />}
-                            className="text-red-400 hover:!text-red-600 hover:!bg-red-50"
-                        />
+                        <Tooltip title="Hapus">
+                            <Button size="small" danger icon={<DeleteOutlined />} />
+                        </Tooltip>
                     </Popconfirm>
                 </Space>
             ),

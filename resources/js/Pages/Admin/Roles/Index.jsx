@@ -1,7 +1,7 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import {
-    Table, Button, Space, Tag, Typography, Card, Popconfirm, message, Breadcrumb,
+    Table, Button, Space, Tag, Typography, Card, Popconfirm, message, Breadcrumb, Tooltip,
 } from 'antd';
 import {
     PlusOutlined, EditOutlined, DeleteOutlined, HomeOutlined, TeamOutlined,
@@ -9,7 +9,7 @@ import {
 import { useEffect } from 'react';
 import { usePage } from '@inertiajs/react';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 export default function RolesIndex({ roles }) {
     const { flash } = usePage().props;
@@ -21,6 +21,7 @@ export default function RolesIndex({ roles }) {
 
     const handleDelete = (id) => {
         router.delete(route('admin.roles.destroy', id), {
+            preserveScroll: true,
             onSuccess: () => message.success('Role berhasil dihapus.'),
         });
     };
@@ -72,35 +73,37 @@ export default function RolesIndex({ roles }) {
         },
         {
             title: 'Aksi',
-            key: 'actions',
-            width: 120,
+            key: 'action',
+            width: 90,
+            align: 'center',
             render: (_, record) => (
-                <Space>
-                    <Link href={route('admin.roles.edit', record.id)}>
+                <Space size={4}>
+                    <Tooltip title="Edit">
                         <Button
-                            type="text"
+                            size="small"
+                            type="primary"
+                            ghost
                             icon={<EditOutlined />}
-                            className="text-blue-500 hover:!text-blue-700 hover:!bg-blue-50"
+                            onClick={() => router.visit(route('admin.roles.edit', record.id))}
                         />
-                    </Link>
+                    </Tooltip>
                     <Popconfirm
-                        title="Hapus Role"
+                        title="Hapus role ini?"
                         description={
-                            <Text>
-                                Apakah Anda yakin? <br />
+                            <>
+                                Data yang dihapus tidak dapat dikembalikan.
+                                <br />
                                 <small className="text-orange-500">Users dengan role ini akan kehilangan role-nya.</small>
-                            </Text>
+                            </>
                         }
-                        onConfirm={() => handleDelete(record.id)}
-                        okText="Ya"
+                        okText="Hapus"
+                        okType="danger"
                         cancelText="Batal"
-                        okButtonProps={{ danger: true }}
+                        onConfirm={() => handleDelete(record.id)}
                     >
-                        <Button
-                            type="text"
-                            icon={<DeleteOutlined />}
-                            className="text-red-400 hover:!text-red-600 hover:!bg-red-50"
-                        />
+                        <Tooltip title="Hapus">
+                            <Button size="small" danger icon={<DeleteOutlined />} />
+                        </Tooltip>
                     </Popconfirm>
                 </Space>
             ),

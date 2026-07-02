@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -45,7 +46,18 @@ class UserController extends Controller
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
-        User::create($validated);
+        $user = User::create($validated);
+
+        ActivityLogger::log(
+            aksi: 'create',
+            deskripsi: "Membuat user: {$user->name} ({$user->email})",
+            subject: $user,
+            metadata: [
+                'name' => $user->name,
+                'email' => $user->email,
+                'role_id' => $user->role_id,
+            ],
+        );
 
         return redirect()->route('admin.users.index')
             ->with('success', 'User berhasil dibuat.');
@@ -78,7 +90,31 @@ class UserController extends Controller
             $validated['password'] = Hash::make($request->password);
         }
 
+        $trackedFields = ['name', 'email', 'role_id'];
+        $original = $user->only($trackedFields);
         $user->update($validated);
+
+        $changes = collect($validated)
+            ->only(array_merge($trackedFields, $request->filled('password') ? ['password'] : []))
+            ->mapWithKeys(function ($value, $key) use ($original, $request) {
+                if ($key === 'password') {
+                    return ['password' => ['from' => '***', 'to' => '*** (diperbarui)']];
+                }
+
+                $from = $original[$key] ?? null;
+
+                return ((string) $from !== (string) $value)
+                    ? [$key => ['from' => $from, 'to' => $value]]
+                    : [];
+            })
+            ->all();
+
+        ActivityLogger::log(
+            aksi: 'update',
+            deskripsi: "Memperbarui user: {$user->name} ({$user->email})",
+            subject: $user,
+            metadata: ['changes' => $changes],
+        );
 
         return redirect()->route('admin.users.index')
             ->with('success', 'User berhasil diperbarui.');
@@ -88,7 +124,21 @@ class UserController extends Controller
     {
         $this->authorize('delete', $user);
 
+        $name = $user->name;
+        $email = $user->email;
+        $userId = $user->id;
+
         $user->delete();
+
+        ActivityLogger::log(
+            aksi: 'delete',
+            deskripsi: "Menghapus user: {$name} ({$email})",
+            metadata: [
+                'deleted_user_id' => $userId,
+                'name' => $name,
+                'email' => $email,
+            ],
+        );
 
         return redirect()->route('admin.users.index')
             ->with('success', 'User berhasil dihapus.');
