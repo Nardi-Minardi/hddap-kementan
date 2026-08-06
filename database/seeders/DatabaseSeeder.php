@@ -32,6 +32,7 @@ class DatabaseSeeder extends Seeder
         $this->call(KelompokPetaniSeeder::class);
         $this->call(PetaniSeeder::class);
         $this->call(WilayahSeeder::class);
+        $this->call(PermissionSeeder::class);
     }
 }
 

@@ -17,6 +17,10 @@ export default function LogframeComponentFilter({ filters = {}, routeName }) {
             params.search = filters.search;
         }
 
+        if (filters.tahap) {
+            params.tahap = filters.tahap;
+        }
+
         if (component) {
             params.component = component;
         }
@@ -25,6 +29,7 @@ export default function LogframeComponentFilter({ filters = {}, routeName }) {
     };
 
     const isActive = (value) => String(filters.component ?? '') === value;
+    const isGeneralView = routeName === 'logframe' && !filters.component;
 
     return (
         <Space wrap className="mb-4">
@@ -38,11 +43,13 @@ export default function LogframeComponentFilter({ filters = {}, routeName }) {
                     {option.label}
                 </Button>
             ))}
-            <Tooltip title="Reset filter">
+            <Tooltip title={routeName === 'logframe' ? 'Indikator umum (Component -)' : 'Reset filter'}>
                 <Button
                     icon={<ReloadOutlined />}
+                    type={isGeneralView ? 'primary' : 'default'}
+                    className={isGeneralView ? '!border-emerald-500 !bg-emerald-500 hover:!bg-emerald-600' : ''}
                     onClick={() => applyFilter(null)}
-                    aria-label="Reset filter"
+                    aria-label={routeName === 'logframe' ? 'Indikator umum' : 'Reset filter'}
                 />
             </Tooltip>
         </Space>

@@ -3,14 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\KelompokPetani;
-use App\Models\Provinsi;
 use App\Models\KabKota;
+use App\Models\KelompokPetani;
 use App\Models\Kecamatan;
 use App\Models\KelDes;
-use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
+use App\Models\Petani;
+use App\Models\Poktan;
+use App\Models\Provinsi;
+use App\Services\UserScopeService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -18,37 +21,105 @@ class KelompokPetaniController extends Controller
 {
     public function index(Request $request): Response
     {
-        $query = KelompokPetani::query()->orderBy('id');
+        $scope = UserScopeService::current();
+        $query = Poktan::query()
+            ->select([
+                'id',
+                'kode_kota',
+                'kode_cluster',
+                'nama_poktan',
+                'ketua',
+                'telp',
+            ])
+            ->with([
+                'cluster:id,nama_cluster',
+                'kabKota:id,code,name,provinsi_code',
+                'kabKota.provinsi:id,code,name',
+            ])
+            ->withCount('petani as jumlah_anggota')
+            ->orderBy('id');
+
+        $scope->applyKabKotaScope($query);
 
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('nama_poktan', 'ilike', "%{$search}%")
-                  ->orWhere('nama_ketua_poktan', 'ilike', "%{$search}%")
-                  ->orWhere('provinsi_name', 'ilike', "%{$search}%")
-                  ->orWhere('kab_kota_name', 'ilike', "%{$search}%")
-                  ->orWhere('kecamatan_name', 'ilike', "%{$search}%")
-                  ->orWhere('kel_des_name', 'ilike', "%{$search}%");
+                    ->orWhere('ketua', 'ilike', "%{$search}%")
+                    ->orWhere('telp', 'ilike', "%{$search}%")
+                    ->orWhere('alamat', 'ilike', "%{$search}%")
+                    ->orWhereHas('cluster', fn ($clusterQuery) => $clusterQuery
+                        ->where('nama_cluster', 'ilike', "%{$search}%"))
+                    ->orWhereHas('kabKota', fn ($kabQuery) => $kabQuery
+                        ->where('name', 'ilike', "%{$search}%")
+                        ->orWhereHas('provinsi', fn ($provQuery) => $provQuery
+                            ->where('name', 'ilike', "%{$search}%")));
             });
         }
 
-        if ($request->filled('provinsi_id')) {
-            $query->where('provinsi_id', $request->provinsi_id);
+        if ($request->filled('provinsi_code')) {
+            $query->whereHas('kabKota', fn ($kabQuery) => $kabQuery
+                ->where('provinsi_code', (string) $request->provinsi_code));
         }
 
-        if ($request->filled('kab_kota_id')) {
-            $query->where('kab_kota_id', $request->kab_kota_id);
+        if ($request->filled('kode_kota')) {
+            $scope->ensureCanAccessKabKota($request->kode_kota);
+            $query->where('kode_kota', (int) $request->kode_kota);
         }
+
+        $hddapKabCodes = $scope->allowedKabKotaCodes();
+
+        $provinsis = Provinsi::query()
+            ->whereIn('code', KabKota::query()
+                ->whereIn('code', $hddapKabCodes)
+                ->distinct()
+                ->pluck('provinsi_code'))
+            ->orderBy('name')
+            ->get(['code', 'name']);
+
+        $kabKotas = $request->filled('provinsi_code')
+            ? KabKota::query()
+                ->where('provinsi_code', (string) $request->provinsi_code)
+                ->whereIn('code', $hddapKabCodes)
+                ->orderBy('name')
+                ->get(['code', 'name'])
+            : collect();
 
         return Inertia::render('Admin/KelompokPetani/Index', [
-            'poktan'    => $query->paginate(20)->withQueryString(),
-            'provinsis' => Provinsi::orderBy('name')->get(['id', 'name']),
-            'kabKotas'  => $request->filled('provinsi_id')
-                ? KabKota::where('provinsi_code', function ($q) use ($request) {
-                    $q->select('code')->from('m_provinsi')->where('id', $request->provinsi_id);
-                })->orderBy('name')->get(['id', 'name'])
-                : [],
-            'filters'   => $request->only('search', 'provinsi_id', 'kab_kota_id'),
+            'poktan' => $query->paginate(20)->withQueryString(),
+            'provinsis' => $provinsis,
+            'kabKotas' => $kabKotas,
+            'filters' => $request->only('search', 'provinsi_code', 'kode_kota'),
+        ]);
+    }
+
+    public function anggota(Poktan $poktan): JsonResponse
+    {
+        UserScopeService::current()->ensureCanAccessKabKota($poktan->kode_kota);
+
+        $poktan->load('cluster:id,nama_cluster');
+
+        $anggota = Petani::query()
+            ->where('kode_poktan', $poktan->id)
+            ->orderBy('nama_petani')
+            ->get([
+                'id',
+                'nama_petani',
+                'nik_petani',
+                'no_hp_petani',
+                'gender_petani',
+                'usia_petani',
+                'alamat_petani',
+            ]);
+
+        return response()->json([
+            'poktan' => [
+                'id' => $poktan->id,
+                'nama_poktan' => $poktan->nama_poktan,
+                'ketua' => $poktan->ketua,
+                'nama_cluster' => $poktan->cluster?->nama_cluster,
+            ],
+            'anggota' => $anggota,
         ]);
     }
 
@@ -90,7 +161,6 @@ class KelompokPetaniController extends Controller
             'keterangan'                   => 'nullable|string',
         ]);
 
-        // Resolve name fields from selected IDs
         if (!empty($validated['provinsi_id'])) {
             $provinsi = Provinsi::find($validated['provinsi_id']);
             $validated['provinsi_name'] = $provinsi?->name;
@@ -180,12 +250,11 @@ class KelompokPetaniController extends Controller
             ->with('success', 'Kelompok petani berhasil dihapus.');
     }
 
-    // === Dynamic dropdown APIs ===
-
     public function kabKotaByProvinsi(Request $request): JsonResponse
     {
         $provinsi = Provinsi::findOrFail($request->provinsi_id);
         $data = KabKota::where('provinsi_code', $provinsi->code)->orderBy('name')->get(['id', 'name']);
+
         return response()->json($data);
     }
 
@@ -193,6 +262,7 @@ class KelompokPetaniController extends Controller
     {
         $kabKota = KabKota::findOrFail($request->kab_kota_id);
         $data = Kecamatan::where('kab_kota_code', $kabKota->code)->orderBy('name')->get(['id', 'name']);
+
         return response()->json($data);
     }
 
@@ -200,6 +270,7 @@ class KelompokPetaniController extends Controller
     {
         $kecamatan = Kecamatan::findOrFail($request->kecamatan_id);
         $data = KelDes::where('kecamatan_code', $kecamatan->code)->orderBy('name')->get(['id', 'name']);
+
         return response()->json($data);
     }
 }

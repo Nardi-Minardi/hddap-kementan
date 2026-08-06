@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Logframe;
 use App\Services\ActivityLogger;
+use App\Support\LogframeRealisasiPresenter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -12,6 +13,10 @@ use Inertia\Response;
 
 class LogframeController extends Controller
 {
+    public function __construct(
+        private readonly LogframeRealisasiPresenter $logframeRealisasiPresenter,
+    ) {}
+
     public function index(Request $request): Response
     {
         $query = Logframe::query()->orderBy('id');
@@ -37,7 +42,9 @@ class LogframeController extends Controller
         }
 
         return Inertia::render('Admin/Logframe/Index', [
-            'logframes' => $query->paginate(5)->withQueryString(),
+            'logframes' => $this->logframeRealisasiPresenter->applyToPaginator(
+                $query->paginate(5)->withQueryString(),
+            ),
             'filters' => $request->only('search', 'component'),
         ]);
     }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\KkPetani;
 use App\Models\Petani;
+use App\Services\UserScopeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -14,7 +15,9 @@ class PetaniController extends Controller
 {
     public function index(Request $request): Response
     {
+        $scope = UserScopeService::current();
         $query = Petani::query()->orderBy('id');
+        $scope->applyKabKotaScope($query);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -30,13 +33,19 @@ class PetaniController extends Controller
             $query->where('gender_petani', $request->gender);
         }
 
+        if ($request->filled('kode_kota')) {
+            $scope->ensureCanAccessKabKota($request->kode_kota);
+            $query->where('kode_kota', (int) $request->kode_kota);
+        }
+
         if ($request->filled('difabel')) {
             $query->where('difabel', $request->difabel === '1');
         }
 
         return Inertia::render('Admin/Petani/Index', [
             'petanis' => $query->withCount('kkPetani')->paginate(20)->withQueryString(),
-            'filters' => $request->only('search', 'gender', 'difabel'),
+            'filters' => $request->only('search', 'gender', 'kode_kota', 'difabel'),
+            'kabKotaOptions' => $scope->kabKotaOptions(),
         ]);
     }
 
@@ -65,11 +74,15 @@ class PetaniController extends Controller
 
     public function edit(Petani $petani): Response
     {
+        UserScopeService::current()->ensureCanAccessKabKota($petani->kode_kota);
+
         return Inertia::render('Admin/Petani/Edit', ['petani' => $petani]);
     }
 
     public function update(Request $request, Petani $petani): RedirectResponse
     {
+        UserScopeService::current()->ensureCanAccessKabKota($petani->kode_kota);
+
         $validated = $request->validate([
             'nama_petani'   => 'required|string|max:255',
             'nik_petani'    => 'nullable|string|max:16',
@@ -88,6 +101,8 @@ class PetaniController extends Controller
 
     public function destroy(Petani $petani): RedirectResponse
     {
+        UserScopeService::current()->ensureCanAccessKabKota($petani->kode_kota);
+
         $petani->delete();
 
         return redirect()->route('admin.petani.index')
@@ -96,6 +111,8 @@ class PetaniController extends Controller
 
     public function keluarga(Petani $petani): Response
     {
+        UserScopeService::current()->ensureCanAccessKabKota($petani->kode_kota);
+
         $keluarga = KkPetani::where('m_petani_id', $petani->id)->orderBy('id')->get();
 
         return Inertia::render('Admin/Petani/Keluarga', [

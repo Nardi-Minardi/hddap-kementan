@@ -12,7 +12,8 @@ class BeritaController extends Controller
     {
         return Berita::query()
             ->where('is_published', true)
+            ->orderByDesc('urutan')
             ->orderByDesc('published_at')
-            ->get(['id', 'judul', 'slug', 'ringkasan', 'konten', 'image_url', 'published_at']);
+            ->get(['id', 'judul', 'slug', 'tipe', 'ringkasan', 'konten', 'image_url', 'published_at']);
     }
 }

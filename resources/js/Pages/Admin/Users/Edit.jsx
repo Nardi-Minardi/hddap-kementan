@@ -1,4 +1,5 @@
 import AdminLayout from '@/Layouts/AdminLayout';
+import UserAccessFields from '@/Components/Admin/UserAccessFields';
 import { Head, useForm, Link } from '@inertiajs/react';
 import {
     Card, Form, Input, Select, Button, Typography, Breadcrumb, Space,
@@ -7,13 +8,16 @@ import { SaveOutlined, ArrowLeftOutlined, HomeOutlined } from '@ant-design/icons
 
 const { Title } = Typography;
 
-export default function UsersEdit({ user, roles }) {
+export default function UsersEdit({ user, roles, permissionGroups, kabKotaOptions, canManagePusat }) {
     const { data, setData, patch, processing, errors } = useForm({
         name: user.name,
         email: user.email,
         password: '',
         password_confirmation: '',
         role_id: user.role_id,
+        is_pusat: !!user.is_pusat,
+        permission_keys: user.permission_keys ?? [],
+        kab_kota_codes: user.kab_kota_codes ?? [],
     });
 
     const handleSubmit = () => {
@@ -71,7 +75,7 @@ export default function UsersEdit({ user, roles }) {
                         <Form.Item
                             label="Role"
                             validateStatus={errors.role_id ? 'error' : ''}
-                            help={errors.role_id}
+                            help={errors.role_id || 'Harus Administrator agar menu Petani, Pendamping, dll. muncul setelah login.'}
                             required
                         >
                             <Select
@@ -108,6 +112,15 @@ export default function UsersEdit({ user, roles }) {
                                 size="large"
                             />
                         </Form.Item>
+
+                        <UserAccessFields
+                            data={data}
+                            setData={setData}
+                            errors={errors}
+                            permissionGroups={permissionGroups}
+                            kabKotaOptions={kabKotaOptions}
+                            canManagePusat={canManagePusat}
+                        />
 
                         <Form.Item className="mb-0 pt-2">
                             <Space>

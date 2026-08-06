@@ -1,11 +1,29 @@
 import PublicLayout from '@/Layouts/PublicLayout';
 import LogframeComponentFilter from '@/Components/LogframeComponentFilter';
 import { Head, router } from '@inertiajs/react';
-import { Card, Input, Pagination, Table, Tag, Tooltip, Typography } from 'antd';
+import { Card, Input, Pagination, Select, Table, Tag, Tooltip, Typography } from 'antd';
 import { SearchOutlined, TableOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 
 const { Title, Text } = Typography;
+
+function buildFilterParams(filters, overrides = {}) {
+    const params = { page: 1, ...overrides };
+
+    if (filters.search) {
+        params.search = filters.search;
+    }
+
+    if (filters.component) {
+        params.component = filters.component;
+    }
+
+    if (filters.tahap) {
+        params.tahap = filters.tahap;
+    }
+
+    return params;
+}
 
 function tingkatCell(value) {
     if (!value) {
@@ -36,13 +54,26 @@ function textCell(value, width = 220) {
     );
 }
 
-export default function LogframeIndex({ logframes, filters = {} }) {
+export default function LogframeIndex({ logframes, filters = {}, tahapOptions = [] }) {
     const [search, setSearch] = useState(filters.search || '');
 
     const handleSearch = (value) => {
         router.get(
             route('logframe'),
-            { search: value || undefined, component: filters.component, page: 1 },
+            buildFilterParams(filters, { search: value || undefined }),
+            { preserveState: true, replace: true },
+        );
+    };
+
+    const tahapSelectOptions = [
+        { label: 'Semua Tahap', value: '' },
+        ...tahapOptions,
+    ];
+
+    const handleTahapChange = (value) => {
+        router.get(
+            route('logframe'),
+            buildFilterParams(filters, { tahap: value || undefined }),
             { preserveState: true, replace: true },
         );
     };
@@ -76,34 +107,6 @@ export default function LogframeIndex({ logframes, filters = {} }) {
             key: 'nama_indikator',
             width: 260,
             render: (value) => textCell(value, 260),
-        },
-        {
-            title: 'Definisi Indikator',
-            dataIndex: 'definisi_indikator',
-            key: 'definisi_indikator',
-            width: 420,
-            render: (value) => textCell(value, 420),
-        },
-        {
-            title: 'Data yang Dikumpulkan',
-            dataIndex: 'data_yg_dikumpulkan',
-            key: 'data_yg_dikumpulkan',
-            width: 380,
-            render: (value) => textCell(value, 380),
-        },
-        {
-            title: 'Sumber Data',
-            dataIndex: 'sumber_data',
-            key: 'sumber_data',
-            width: 180,
-            render: (value) => textCell(value, 180),
-        },
-        {
-            title: 'Nilai Dasar',
-            dataIndex: 'nilai_dasar',
-            key: 'nilai_dasar',
-            width: 140,
-            render: (value) => textCell(value, 140),
         },
         {
             title: 'Target Pertengahan Proyek',
@@ -146,11 +149,19 @@ export default function LogframeIndex({ logframes, filters = {} }) {
                     className="rounded-xl border border-gray-100 shadow-sm"
                     title={
                         <div className="flex flex-wrap items-center justify-between gap-3 py-1">
-                            <div className="flex items-center gap-2">
-                                <TableOutlined className="text-emerald-600" />
-                                <Title level={5} className="!mb-0 !text-gray-800">
-                                    Daftar Indikator Logframe
-                                </Title>
+                            <div className="flex flex-wrap items-center gap-3">
+                                <div className="flex items-center gap-2">
+                                    <TableOutlined className="text-emerald-600" />
+                                    <Title level={5} className="!mb-0 !text-gray-800">
+                                        Daftar Indikator Logframe
+                                    </Title>
+                                </div>
+                                <Select
+                                    value={filters.tahap ?? ''}
+                                    onChange={handleTahapChange}
+                                    options={tahapSelectOptions}
+                                    style={{ minWidth: 160 }}
+                                />
                             </div>
                             <Input
                                 placeholder="Cari tingkat, indikator, target..."
@@ -175,7 +186,7 @@ export default function LogframeIndex({ logframes, filters = {} }) {
                         columns={columns}
                         rowKey="id"
                         pagination={false}
-                        scroll={{ x: 1960 }}
+                        scroll={{ x: 1220 }}
                         size="middle"
                         bordered
                         rowClassName="align-top"
@@ -190,7 +201,7 @@ export default function LogframeIndex({ logframes, filters = {} }) {
                             onChange={(page) =>
                                 router.get(
                                     route('logframe'),
-                                    { ...filters, page },
+                                    buildFilterParams(filters, { page }),
                                     { preserveState: true },
                                 )
                             }

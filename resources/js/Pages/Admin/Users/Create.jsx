@@ -1,4 +1,5 @@
 import AdminLayout from '@/Layouts/AdminLayout';
+import UserAccessFields from '@/Components/Admin/UserAccessFields';
 import { Head, useForm, Link } from '@inertiajs/react';
 import {
     Card, Form, Input, Select, Button, Typography, Breadcrumb, Space,
@@ -7,13 +8,16 @@ import { SaveOutlined, ArrowLeftOutlined, HomeOutlined } from '@ant-design/icons
 
 const { Title } = Typography;
 
-export default function UsersCreate({ roles }) {
+export default function UsersCreate({ roles, permissionGroups, kabKotaOptions, canManagePusat, defaultAdminRoleId }) {
     const { data, setData, post, processing, errors } = useForm({
         name: '',
         email: '',
         password: '',
         password_confirmation: '',
-        role_id: '',
+        role_id: defaultAdminRoleId ?? '',
+        is_pusat: false,
+        permission_keys: [],
+        kab_kota_codes: [],
     });
 
     const handleSubmit = () => {
@@ -71,7 +75,7 @@ export default function UsersCreate({ roles }) {
                         <Form.Item
                             label="Role"
                             validateStatus={errors.role_id ? 'error' : ''}
-                            help={errors.role_id}
+                            help={errors.role_id || 'Pilih Administrator agar menu admin & permission di bawah bisa dipakai.'}
                             required
                         >
                             <Select
@@ -110,6 +114,15 @@ export default function UsersCreate({ roles }) {
                                 size="large"
                             />
                         </Form.Item>
+
+                        <UserAccessFields
+                            data={data}
+                            setData={setData}
+                            errors={errors}
+                            permissionGroups={permissionGroups}
+                            kabKotaOptions={kabKotaOptions}
+                            canManagePusat={canManagePusat}
+                        />
 
                         <Form.Item className="mb-0 pt-2">
                             <Space>

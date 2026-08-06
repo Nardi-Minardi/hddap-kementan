@@ -3,18 +3,14 @@ import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import BeritaSwiper from '@/Components/BeritaSwiper';
 
-const aiTaniStats = [
-    { label: 'Total Petani Terdaftar', value: '1.248.390', color: 'text-green-300' },
-    { label: 'Kelompok Tani Aktif', value: '84.720', color: 'text-emerald-300' },
-    { label: 'Kabupaten/Kota Tercover', value: '514', color: 'text-teal-300' },
-];
-
 const navItems = [
     { label: 'Beranda', href: '#beranda' },
     { label: 'Fitur', href: '#fitur' },
     { label: 'Berita', href: '#berita' },
     { label: 'Logframe', href: '/logframe', external: true },
+    { label: 'Sebaran CPCL', href: '/sebaran-cpcl', external: true },
     { label: 'Statistik', href: '/statistik', external: true },
+    { label: 'Dokumen Kegiatan', href: '/dokumen-kegiatan', external: true },
     { label: 'Tentang', href: '#tentang' },
 ];
 
@@ -44,7 +40,18 @@ const featureCardVariants = {
     },
 };
 
-export default function Welcome({ auth, canLogin, canRegister, berita = [] }) {
+function formatStatNumber(value) {
+    return new Intl.NumberFormat('id-ID').format(value);
+}
+
+function formatLuasLahan(value) {
+    return new Intl.NumberFormat('id-ID', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+    }).format(value ?? 0);
+}
+
+export default function Welcome({ auth, canLogin, canRegister, berita = [], homeStats = {}, aiTaniStats = {} }) {
     const { social, videos } = usePage().props;
     const heroVideos = videos?.hero ?? [];
     const aiTaniVideoUrl = videos?.aiTani ?? '/videos/ai-tani-menyapa.mp4';
@@ -243,11 +250,18 @@ export default function Welcome({ auth, canLogin, canRegister, berita = [] }) {
         },
     ];
 
+    const aiTaniStatItems = [
+        { label: 'Total Petani Terdaftar', value: formatStatNumber(aiTaniStats.totalPetani ?? 0), color: 'text-green-300' },
+        { label: 'Jumlah Cluster', value: formatStatNumber(aiTaniStats.jumlahCluster ?? 0), color: 'text-emerald-300' },
+        { label: 'Jumlah Kelompok Tani', value: formatStatNumber(aiTaniStats.jumlahPoktan ?? 0), color: 'text-teal-300' },
+        { label: 'Jumlah Lokasi HDDAP (Kab/Kota)', value: formatStatNumber(aiTaniStats.jumlahLokasiHddap ?? 0), color: 'text-lime-300' },
+    ];
+
     const stats = [
-        { value: '34', label: 'Provinsi', suffix: '' },
-        { value: '500', label: 'Kabupaten/Kota', suffix: '+' },
-        { value: '1 Juta', label: 'Data Petani', suffix: '+' },
-        { value: '99.9', label: 'Uptime Sistem', suffix: '%' },
+        { value: formatStatNumber(homeStats.provinsi ?? 0), label: 'Provinsi' },
+        { value: formatStatNumber(homeStats.kabKota ?? 0), label: 'Kabupaten/Kota' },
+        { value: formatStatNumber(homeStats.totalPetani ?? 0), label: 'Data Petani' },
+        { value: formatLuasLahan(homeStats.luasLahan ?? 0), label: 'Luas Lahan (Ha)' },
     ];
 
     return (
@@ -257,10 +271,10 @@ export default function Welcome({ auth, canLogin, canRegister, berita = [] }) {
 
                 {/* ── Navbar ── */}
                 <nav
-                    className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+                    className={`public-navbar-glow fixed inset-x-0 top-0 z-50 border-b transition-all duration-300 ${
                         scrolled
-                            ? 'bg-white/95 backdrop-blur-md shadow-sm'
-                            : 'bg-transparent'
+                            ? 'border-white/60 bg-white/85 backdrop-blur-md'
+                            : 'border-white/30 bg-white/10 backdrop-blur-md'
                     }`}
                 >
                     <div className="px-4 sm:px-6 lg:px-16">
@@ -289,7 +303,7 @@ export default function Welcome({ auth, canLogin, canRegister, berita = [] }) {
                                         <a
                                             key={item.label}
                                             href={item.href}
-                                            className={`inline-flex h-10 items-center border-b-2 text-sm font-medium transition ${getDesktopNavClass(item)}`}
+                                            className={`inline-flex h-10 items-center border-b-2 text-base font-medium transition ${getDesktopNavClass(item)}`}
                                         >
                                             {item.label}
                                         </a>
@@ -390,7 +404,7 @@ export default function Welcome({ auth, canLogin, canRegister, berita = [] }) {
                             <a
                                 key={item.label}
                                 href={item.href}
-                                className={`block rounded-lg border-b-2 px-3 py-3 text-sm font-medium transition ${getMobileNavClass(item)}`}
+                                className={`block rounded-lg border-b-2 px-3 py-3 text-base font-medium transition ${getMobileNavClass(item)}`}
                                 onClick={() => setMenuOpen(false)}
                             >
                                 {item.label}
@@ -558,7 +572,7 @@ export default function Welcome({ auth, canLogin, canRegister, berita = [] }) {
                             {stats.map((s) => (
                                 <div key={s.label} className="text-center">
                                     <p className="text-3xl font-extrabold text-white">
-                                        {s.value}<span className="text-green-300">{s.suffix}</span>
+                                        {s.value}
                                     </p>
                                     <p className="mt-1 text-sm font-medium text-green-200">{s.label}</p>
                                 </div>
@@ -793,7 +807,7 @@ export default function Welcome({ auth, canLogin, canRegister, berita = [] }) {
                                     <div className="h-3 w-3 rounded-full bg-yellow-400" />
                                     <div className="h-3 w-3 rounded-full bg-green-400" />
                                 </div>
-                                {aiTaniStats.map((item) => (
+                                {aiTaniStatItems.map((item) => (
                                     <div key={item.label} className="mt-4 rounded-xl bg-white/10 p-4 first:mt-0">
                                         <p className="text-xs text-green-200/70">{item.label}</p>
                                         <p className={`mt-1 text-2xl font-bold ${item.color}`}>{item.value}</p>

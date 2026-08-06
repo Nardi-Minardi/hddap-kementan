@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { Layout, Menu, Avatar, Dropdown, Typography, Badge, Button } from 'antd';
 import {
     DashboardOutlined,
     UserOutlined,
     TeamOutlined,
+    SolutionOutlined,
     MenuFoldOutlined,
     MenuUnfoldOutlined,
     LogoutOutlined,
@@ -23,17 +24,39 @@ import {
     HomeOutlined,
     BankOutlined,
     UsergroupAddOutlined,
+    FileTextOutlined,
+    BookOutlined,
 } from '@ant-design/icons';
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
+
+function filterMenuItems(items, allowedMenuKeys) {
+    const allowed = new Set(allowedMenuKeys);
+
+    return items
+        .map((item) => {
+            if (item.children) {
+                const children = filterMenuItems(item.children, allowedMenuKeys);
+                if (children.length === 0) {
+                    return null;
+                }
+
+                return { ...item, children };
+            }
+
+            return allowed.has(item.key) ? item : null;
+        })
+        .filter(Boolean);
+}
 
 export default function AdminLayout({ children, title }) {
     const { auth, url } = usePage().props;
     const user = auth.user;
     const [collapsed, setCollapsed] = useState(false);
 
-    const menuItems = [
+    const menuItems = useMemo(() => {
+        const allItems = [
         {
             key: '/admin/dashboard',
             icon: <DashboardOutlined />,
@@ -91,12 +114,39 @@ export default function AdminLayout({ children, title }) {
                     icon: <UserOutlined />,
                     label: <Link href={route('admin.petani.index')}>Petani</Link>,
                 },
+                {
+                    key: '/admin/pendamping',
+                    icon: <SolutionOutlined />,
+                    label: <Link href={route('admin.pendamping.index')}>Pendamping</Link>,
+                },
             ],
         },
         {
-            key: '/admin/data-verval',
+            key: 'data-pelatihan',
             icon: <BarChartOutlined />,
-            label: <Link href={route('admin.data-verval.index')}>Data Verval</Link>,
+            label: 'Data Pelatihan',
+            children: [
+                {
+                    key: '/admin/data-verval/jenis-pelatihan',
+                    icon: <ReadOutlined />,
+                    label: <Link href={route('admin.data-verval.jenis-pelatihan.index')}>Jenis Pelatihan</Link>,
+                },
+                {
+                    key: '/admin/data-verval/pelatihan',
+                    icon: <ReadOutlined />,
+                    label: <Link href={route('admin.data-verval.pelatihan.index')}>Pelatihan</Link>,
+                },
+            ],
+        },
+        {
+            key: '/admin/berita',
+            icon: <FileTextOutlined />,
+            label: <Link href={route('admin.berita.index')}>Berita & Agenda</Link>,
+        },
+        {
+            key: '/admin/dokumen-kegiatan',
+            icon: <BookOutlined />,
+            label: <Link href={route('admin.dokumen-kegiatan.index')}>Dokumen Kegiatan</Link>,
         },
         {
             key: '/admin/kelembagaan-poktan',
@@ -128,7 +178,16 @@ export default function AdminLayout({ children, title }) {
             icon: <HistoryOutlined />,
             label: <Link href={route('admin.activity-log.index')}>Activity Log</Link>,
         },
-    ];
+        ];
+
+        const allowedMenuKeys = auth.menuKeys ?? [];
+
+        if (allowedMenuKeys.length === 0) {
+            return allItems;
+        }
+
+        return filterMenuItems(allItems, allowedMenuKeys);
+    }, [auth.menuKeys]);
 
     const getSelectedKeys = () => {
         const pathname = window.location.pathname;
@@ -140,7 +199,9 @@ export default function AdminLayout({ children, title }) {
         if (pathname.startsWith('/admin/kel-des')) return ['/admin/kel-des'];
         if (pathname.startsWith('/admin/kelompok-petani')) return ['/admin/kelompok-petani'];
         if (pathname.startsWith('/admin/petani')) return ['/admin/petani'];
-        if (pathname.startsWith('/admin/data-verval')) return ['/admin/data-verval'];
+        if (pathname.startsWith('/admin/pendamping')) return ['/admin/pendamping'];
+        if (pathname.startsWith('/admin/data-verval/jenis-pelatihan')) return ['/admin/data-verval/jenis-pelatihan'];
+        if (pathname.startsWith('/admin/data-verval/pelatihan')) return ['/admin/data-verval/pelatihan'];
         if (pathname.startsWith('/admin/kelembagaan-poktan')) return ['/admin/kelembagaan-poktan'];
         if (pathname.startsWith('/admin/koperasi')) return ['/admin/koperasi'];
         if (pathname.startsWith('/admin/bintek')) return ['/admin/bintek'];
@@ -149,6 +210,8 @@ export default function AdminLayout({ children, title }) {
         if (pathname.startsWith('/admin/activity-log')) return ['/admin/activity-log'];
         if (pathname.startsWith('/admin/profile')) return ['/admin/profile'];
         if (pathname.startsWith('/admin/dashboard')) return ['/admin/dashboard'];
+        if (pathname.startsWith('/admin/berita')) return ['/admin/berita'];
+        if (pathname.startsWith('/admin/dokumen-kegiatan')) return ['/admin/dokumen-kegiatan'];
         return ['/admin/dashboard'];
     };
 
@@ -158,7 +221,9 @@ export default function AdminLayout({ children, title }) {
             pathname.startsWith('/admin/kecamatan') || pathname.startsWith('/admin/kel-des')) return ['wilayah'];
         if (pathname.startsWith('/admin/users') || pathname.startsWith('/admin/roles') ||
             pathname.startsWith('/admin/kelompok-petani') ||
-            pathname.startsWith('/admin/petani')) return ['master'];
+            pathname.startsWith('/admin/petani') ||
+            pathname.startsWith('/admin/pendamping')) return ['master'];
+        if (pathname.startsWith('/admin/data-verval')) return ['data-pelatihan'];
         return [];
     };
 

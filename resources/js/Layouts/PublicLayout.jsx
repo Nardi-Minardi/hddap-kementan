@@ -6,7 +6,9 @@ const navItems = [
     { label: 'Fitur', href: '/#fitur' },
     { label: 'Berita', href: '/#berita' },
     { label: 'Logframe', href: route('logframe'), routeName: 'logframe' },
+    { label: 'Sebaran CPCL', href: route('sebaran-cpcl'), routeName: 'sebaran-cpcl' },
     { label: 'Statistik', href: route('statistik'), routeName: 'statistik' },
+    { label: 'Dokumen Kegiatan', href: route('dokumen-kegiatan'), routeName: 'dokumen-kegiatan' },
     { label: 'Tentang', href: '/#tentang' },
 ];
 
@@ -50,7 +52,7 @@ export default function PublicLayout({ children }) {
 
     return (
         <div className="min-h-screen overflow-x-hidden bg-gray-50 font-sans antialiased">
-            <nav className="fixed inset-x-0 top-0 z-50 bg-white/95 shadow-sm backdrop-blur-md">
+            <nav className="public-navbar-glow fixed inset-x-0 top-0 z-50 border-b border-white/60 bg-white/85 backdrop-blur-md">
                 <div className="px-4 sm:px-6 lg:px-16">
                     <div className="flex h-16 items-center justify-between">
                         <Link href="/" className="flex items-center gap-3">
@@ -71,7 +73,7 @@ export default function PublicLayout({ children }) {
                                     <a
                                         key={item.label}
                                         href={item.href}
-                                        className={`inline-flex h-10 items-center border-b-2 text-sm font-medium transition ${navLinkClass(item)}`}
+                                        className={`inline-flex h-10 items-center border-b-2 text-base font-medium transition ${navLinkClass(item)}`}
                                     >
                                         {item.label}
                                     </a>
@@ -154,7 +156,7 @@ export default function PublicLayout({ children }) {
                         <a
                             key={item.label}
                             href={item.href}
-                            className={`block rounded-lg border-b-2 px-3 py-3 text-sm font-medium transition ${navLinkClass(item, true)}`}
+                            className={`block rounded-lg border-b-2 px-3 py-3 text-base font-medium transition ${navLinkClass(item, true)}`}
                             onClick={() => setMenuOpen(false)}
                         >
                             {item.label}

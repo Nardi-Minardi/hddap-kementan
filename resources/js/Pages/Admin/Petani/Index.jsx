@@ -3,6 +3,7 @@ import { Head, router } from '@inertiajs/react';
 import { Table, Card, Input, Select, Typography, Breadcrumb, Tag, Space, Button, Popconfirm, Tooltip } from 'antd';
 import { HomeOutlined, UserOutlined, SearchOutlined, PlusOutlined, EditOutlined, DeleteOutlined, TeamOutlined } from '@ant-design/icons';
 import { useState } from 'react';
+import { usePermissions } from '@/utils/permissions';
 
 const { Title } = Typography;
 
@@ -16,8 +17,9 @@ const DIFABEL_OPTIONS = [
     { value: '0', label: 'Tidak' },
 ];
 
-export default function PetaniIndex({ petanis, filters }) {
+export default function PetaniIndex({ petanis, filters, kabKotaOptions = [] }) {
     const [search, setSearch] = useState(filters.search || '');
+    const { can } = usePermissions();
 
     const handleFilter = (params) => {
         router.get(route('admin.petani.index'), { ...filters, ...params, page: 1 }, { preserveState: true, replace: true });
@@ -94,36 +96,42 @@ export default function PetaniIndex({ petanis, filters }) {
             align: 'center',
             render: (_, record) => (
                 <Space size={4}>
-                    <Tooltip title="Data Keluarga">
-                        <Button
-                            size="small"
-                            icon={<TeamOutlined />}
-                            onClick={() => router.visit(route('admin.petani.keluarga', record.id))}
-                        >
-                            {record.kk_petani_count > 0 && <span className="ml-1 text-xs">{record.kk_petani_count}</span>}
-                        </Button>
-                    </Tooltip>
-                    <Tooltip title="Edit">
-                        <Button
-                            size="small"
-                            type="primary"
-                            ghost
-                            icon={<EditOutlined />}
-                            onClick={() => router.visit(route('admin.petani.edit', record.id))}
-                        />
-                    </Tooltip>
-                    <Popconfirm
-                        title="Hapus petani ini?"
-                        description="Data yang dihapus tidak dapat dikembalikan."
-                        okText="Hapus"
-                        okType="danger"
-                        cancelText="Batal"
-                        onConfirm={() => router.delete(route('admin.petani.destroy', record.id), { preserveScroll: true })}
-                    >
-                        <Tooltip title="Hapus">
-                            <Button size="small" danger icon={<DeleteOutlined />} />
+                    {can('petani.view') && (
+                        <Tooltip title="Data Keluarga">
+                            <Button
+                                size="small"
+                                icon={<TeamOutlined />}
+                                onClick={() => router.visit(route('admin.petani.keluarga', record.id))}
+                            >
+                                {record.kk_petani_count > 0 && <span className="ml-1 text-xs">{record.kk_petani_count}</span>}
+                            </Button>
                         </Tooltip>
-                    </Popconfirm>
+                    )}
+                    {can('petani.update') && (
+                        <Tooltip title="Edit">
+                            <Button
+                                size="small"
+                                type="primary"
+                                ghost
+                                icon={<EditOutlined />}
+                                onClick={() => router.visit(route('admin.petani.edit', record.id))}
+                            />
+                        </Tooltip>
+                    )}
+                    {can('petani.delete') && (
+                        <Popconfirm
+                            title="Hapus petani ini?"
+                            description="Data yang dihapus tidak dapat dikembalikan."
+                            okText="Hapus"
+                            okType="danger"
+                            cancelText="Batal"
+                            onConfirm={() => router.delete(route('admin.petani.destroy', record.id), { preserveScroll: true })}
+                        >
+                            <Tooltip title="Hapus">
+                                <Button size="small" danger icon={<DeleteOutlined />} />
+                            </Tooltip>
+                        </Popconfirm>
+                    )}
                 </Space>
             ),
         },
@@ -150,6 +158,16 @@ export default function PetaniIndex({ petanis, filters }) {
                         <Space wrap>
                             <Select
                                 allowClear
+                                placeholder="Filter Kab/Kota"
+                                style={{ width: 220 }}
+                                value={filters.kode_kota || undefined}
+                                onChange={(val) => handleFilter({ kode_kota: val ?? '' })}
+                                options={kabKotaOptions}
+                                showSearch
+                                optionFilterProp="label"
+                            />
+                            <Select
+                                allowClear
                                 placeholder="Filter Gender"
                                 style={{ width: 150 }}
                                 value={filters.gender || undefined}
@@ -167,15 +185,20 @@ export default function PetaniIndex({ petanis, filters }) {
                             <Input
                                 placeholder="Cari nama / NIK / alamat..."
                                 prefix={<SearchOutlined className="text-gray-400" />}
-                                defaultValue={filters.search}
+                                value={search}
                                 onPressEnter={(e) => handleFilter({ search: e.target.value })}
                                 onChange={(e) => setSearch(e.target.value)}
                                 onBlur={() => handleFilter({ search })}
                                 style={{ width: 260 }}
                                 allowClear
-                                onClear={() => handleFilter({ search: '' })}
+                                onClear={() => {
+                                    setSearch('');
+                                    handleFilter({ search: '' });
+                                }}
                             />
-                            <Button type="primary" icon={<PlusOutlined />} onClick={() => router.visit(route('admin.petani.create'))}>Tambah</Button>
+                            {can('petani.create') && (
+                                <Button type="primary" icon={<PlusOutlined />} onClick={() => router.visit(route('admin.petani.create'))}>Tambah</Button>
+                            )}
                         </Space>
                     </div>
                 }

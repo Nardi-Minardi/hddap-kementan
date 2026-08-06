@@ -62,3 +62,118 @@
     border-radius: 9999px;
     background: #15803d;
 }
+
+/* Public navbar — soft white glow like glassmorphism bar */
+@layer components {
+    .public-navbar-glow {
+        box-shadow:
+            0 4px 30px rgba(255, 255, 255, 0.55),
+            0 2px 12px rgba(255, 255, 255, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    }
+}
+
+/* PDF Flipbook */
+.flipbook-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.flipbook-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0;
+    background: linear-gradient(145deg, #f0fdf4 0%, #ecfdf5 50%, #d1fae5 100%);
+    border-radius: 1rem;
+    min-height: 420px;
+}
+
+.flipbook-book {
+    margin: 0 auto;
+    box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.flipbook-page {
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+}
+
+.flipbook-page-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+}
+
+.flipbook-page-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #fff;
+    user-select: none;
+}
+
+.flipbook-page-number {
+    position: absolute;
+    bottom: 8px;
+    right: 10px;
+    font-size: 10px;
+    color: #9ca3af;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.flipbook-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem 1rem;
+    width: 100%;
+}
+
+.flipbook-btn {
+    border-radius: 0.5rem;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    transition: all 0.15s ease;
+}
+
+.flipbook-btn:hover:not(:disabled) {
+    border-color: #16a34a;
+    background: #f0fdf4;
+    color: #15803d;
+}
+
+.flipbook-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.flipbook-status {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.flipbook-download {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #15803d;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.flipbook-download:hover {
+    color: #166534;
+}

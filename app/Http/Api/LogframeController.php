@@ -10,6 +10,8 @@ use App\Http\Requests\Api\LogframeIndexRequest;
 
 use App\Models\Logframe;
 
+use App\Support\LogframeRealisasiPresenter;
+
 use Illuminate\Http\JsonResponse;
 
 
@@ -17,6 +19,12 @@ use Illuminate\Http\JsonResponse;
 class LogframeController extends Controller
 
 {
+
+    public function __construct(
+
+        private readonly LogframeRealisasiPresenter $logframeRealisasiPresenter,
+
+    ) {}
 
     public function index(LogframeIndexRequest $request): JsonResponse
 
@@ -103,6 +111,8 @@ class LogframeController extends Controller
                 'updated_at',
 
             ]);
+
+        $items = $this->logframeRealisasiPresenter->applyToCollection($items);
 
 
 

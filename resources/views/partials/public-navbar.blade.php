@@ -4,12 +4,14 @@
         ['label' => 'Fitur', 'href' => url('/#fitur')],
         ['label' => 'Berita', 'href' => url('/#berita')],
         ['label' => 'Logframe', 'href' => route('logframe'), 'active' => request()->routeIs('logframe')],
+        ['label' => 'Sebaran CPCL', 'href' => route('sebaran-cpcl'), 'active' => request()->routeIs('sebaran-cpcl')],
         ['label' => 'Statistik', 'href' => route('statistik'), 'active' => request()->routeIs('statistik')],
+        ['label' => 'Dokumen Kegiatan', 'href' => route('dokumen-kegiatan'), 'active' => request()->routeIs('dokumen-kegiatan')],
         ['label' => 'Tentang', 'href' => url('/#tentang')],
     ];
 @endphp
 
-<nav id="public-navbar" class="fixed inset-x-0 top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm transition-all duration-300">
+<nav id="public-navbar" class="public-navbar-glow fixed inset-x-0 top-0 z-50 border-b border-white/60 bg-white/85 backdrop-blur-md transition-all duration-300">
     <div class="px-4 sm:px-6 lg:px-16">
         <div class="flex h-16 items-center justify-between">
             <a href="{{ url('/') }}" class="flex items-center gap-3">
@@ -29,7 +31,7 @@
                     @foreach ($navItems as $item)
                         <a
                             href="{{ $item['href'] }}"
-                            class="inline-flex h-10 items-center border-b-2 text-sm font-medium transition hover:border-green-300 hover:text-green-600 {{ !empty($item['active']) ? 'border-green-600 text-green-700' : 'border-transparent text-gray-600' }}"
+                            class="inline-flex h-10 items-center border-b-2 text-base font-medium transition hover:border-green-300 hover:text-green-600 {{ !empty($item['active']) ? 'border-green-600 text-green-700' : 'border-transparent text-gray-600' }}"
                         >
                             {{ $item['label'] }}
                         </a>
@@ -110,7 +112,7 @@
         @foreach ($navItems as $item)
             <a
                 href="{{ $item['href'] }}"
-                class="block rounded-lg border-b-2 px-3 py-3 text-sm font-medium transition hover:bg-green-50 hover:text-green-700 {{ !empty($item['active']) ? 'border-green-600 bg-green-50 text-green-700' : 'border-transparent text-gray-700' }}"
+                class="block rounded-lg border-b-2 px-3 py-3 text-base font-medium transition hover:bg-green-50 hover:text-green-700 {{ !empty($item['active']) ? 'border-green-600 bg-green-50 text-green-700' : 'border-transparent text-gray-700' }}"
             >
                 {{ $item['label'] }}
             </a>

@@ -32,7 +32,19 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user()?->load('role'),
+                'user' => $request->user()?->load(['role', 'permissions', 'kabKotas']),
+                'permissions' => $request->user()?->isAdmin()
+                    ? \App\Services\UserScopeService::current()->permissionKeys()
+                    : [],
+                'isPusat' => (bool) $request->user()?->is_pusat,
+                'can' => fn () => $request->user()?->isAdmin()
+                    ? collect(\App\Services\UserScopeService::current()->permissionKeys())
+                        ->mapWithKeys(fn (string $key) => [$key => true])
+                        ->all()
+                    : [],
+                'menuKeys' => $request->user()?->isAdmin()
+                    ? \App\Services\UserScopeService::current()->menuKeys()
+                    : [],
             ],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
