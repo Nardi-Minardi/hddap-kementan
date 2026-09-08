@@ -1,17 +1,27 @@
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Head, router } from '@inertiajs/react';
-import { Table, Card, Input, Select, Typography, Breadcrumb, Tag, Space, Modal, Button } from 'antd';
-import { HomeOutlined, UsergroupAddOutlined, SearchOutlined } from '@ant-design/icons';
-import { useState } from 'react';
+import { Head, router, usePage } from '@inertiajs/react';
+import {
+    Table, Card, Input, Select, Typography, Breadcrumb, Tag, Space, Modal, Button, Popconfirm, Tooltip, message,
+} from 'antd';
+import {
+    DeleteOutlined, EditOutlined, HomeOutlined, PlusOutlined, SearchOutlined, UsergroupAddOutlined,
+} from '@ant-design/icons';
+import { useEffect, useState } from 'react';
 
 const { Title, Text } = Typography;
 
 export default function KelompokPetaniIndex({ poktan, provinsis, kabKotas, filters }) {
+    const { flash } = usePage().props;
     const [search, setSearch] = useState(filters.search || '');
     const [modalOpen, setModalOpen] = useState(false);
     const [loadingAnggota, setLoadingAnggota] = useState(false);
     const [selectedPoktan, setSelectedPoktan] = useState(null);
     const [anggotaList, setAnggotaList] = useState([]);
+
+    useEffect(() => {
+        if (flash?.success) message.success(flash.success);
+        if (flash?.error) message.error(flash.error);
+    }, [flash]);
 
     const handleFilter = (params) => {
         router.get(
@@ -50,6 +60,12 @@ export default function KelompokPetaniIndex({ poktan, provinsis, kabKotas, filte
         setModalOpen(false);
         setSelectedPoktan(null);
         setAnggotaList([]);
+    };
+
+    const handleDelete = (id) => {
+        router.delete(route('admin.kelompok-petani.destroy', id), {
+            preserveScroll: true,
+        });
     };
 
     const anggotaColumns = [
@@ -164,7 +180,6 @@ export default function KelompokPetaniIndex({ poktan, provinsis, kabKotas, filte
             key: 'jumlah_anggota',
             width: 130,
             align: 'center',
-            fixed: 'right',
             render: (value, record) => {
                 const count = Number(value ?? 0);
 
@@ -184,6 +199,38 @@ export default function KelompokPetaniIndex({ poktan, provinsis, kabKotas, filte
                     </Button>
                 );
             },
+        },
+        {
+            title: 'Aksi',
+            key: 'action',
+            width: 90,
+            align: 'center',
+            fixed: 'right',
+            render: (_, record) => (
+                <Space size={4}>
+                    <Tooltip title="Edit">
+                        <Button
+                            size="small"
+                            type="primary"
+                            ghost
+                            icon={<EditOutlined />}
+                            onClick={() => router.visit(route('admin.kelompok-petani.edit', record.id))}
+                        />
+                    </Tooltip>
+                    <Popconfirm
+                        title="Hapus kelompok petani ini?"
+                        description="Data yang dihapus tidak dapat dikembalikan."
+                        okText="Hapus"
+                        okType="danger"
+                        cancelText="Batal"
+                        onConfirm={() => handleDelete(record.id)}
+                    >
+                        <Tooltip title="Hapus">
+                            <Button size="small" danger ghost icon={<DeleteOutlined />} />
+                        </Tooltip>
+                    </Popconfirm>
+                </Space>
+            ),
         },
     ];
 
@@ -206,6 +253,13 @@ export default function KelompokPetaniIndex({ poktan, provinsis, kabKotas, filte
                     <div className="flex items-center justify-between flex-wrap gap-3 py-1">
                         <Title level={5} className="!mb-0 !text-gray-800">Daftar Kelompok Petani</Title>
                         <Space wrap>
+                            <Button
+                                type="primary"
+                                icon={<PlusOutlined />}
+                                onClick={() => router.visit(route('admin.kelompok-petani.create'))}
+                            >
+                                Tambah
+                            </Button>
                             <Select
                                 allowClear
                                 placeholder="Filter Provinsi"

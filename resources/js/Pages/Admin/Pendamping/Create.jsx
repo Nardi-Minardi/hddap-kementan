@@ -28,21 +28,21 @@ export default function PendampingCreate({
     };
 
     return (
-        <AdminLayout title="Tambah Pendamping">
-            <Head title="Tambah Pendamping" />
+        <AdminLayout title="Tambah Fasilitator">
+            <Head title="Tambah Fasilitator" />
 
             <Breadcrumb
                 className="mb-4"
                 items={[
                     { href: route('dashboard'), title: <><HomeOutlined /> Dashboard</> },
-                    { href: route('admin.pendamping.index'), title: 'Pendamping' },
+                    { href: route('admin.pendamping.index'), title: 'Fasilitator' },
                     { title: 'Tambah' },
                 ]}
             />
 
             <Card
                 className="rounded-xl border border-gray-100 shadow-sm"
-                title={<Title level={5} className="!mb-0 !text-gray-800">Tambah Data Pendamping</Title>}
+                title={<Title level={5} className="!mb-0 !text-gray-800">Tambah Data Fasilitator</Title>}
             >
                 <Form layout="vertical" onFinish={handleSubmit} className="max-w-xl">
                     <PendampingFormFields

@@ -1,15 +1,21 @@
 import AdminLayout from '@/Layouts/AdminLayout';
-import BeritaFormFields from '@/Pages/Admin/Berita/FormFields';
+import BeritaFormFields, { emptyFotoKegiatanState, transformBeritaForm } from '@/Pages/Admin/Berita/FormFields';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeftOutlined, HomeOutlined, SaveOutlined } from '@ant-design/icons';
 import { Breadcrumb, Button, Card, Form, Space, Typography } from 'antd';
 
 const { Title } = Typography;
 
-export default function BeritaCreate({ tipeOptions = [] }) {
-    const { data, setData, post, processing, errors } = useForm({
+export default function BeritaCreate({
+    tipeOptions = [],
+    showKabKota = true,
+    kabKotaOptions = [],
+    defaultKodeKota = null,
+}) {
+    const { data, setData, post, processing, errors, transform } = useForm({
         judul: '',
         tipe: 'berita',
+        kode_kota: defaultKodeKota ?? null,
         ringkasan: '',
         konten: '',
         image: null,
@@ -17,9 +23,11 @@ export default function BeritaCreate({ tipeOptions = [] }) {
         published_at: new Date().toISOString().slice(0, 10),
         is_published: true,
         urutan: 0,
+        foto_kegiatan: emptyFotoKegiatanState(),
     });
 
     const handleSubmit = () => {
+        transform((formData) => transformBeritaForm(formData));
         post(route('admin.berita.store'), { forceFormData: true });
     };
 
@@ -46,6 +54,9 @@ export default function BeritaCreate({ tipeOptions = [] }) {
                         setData={setData}
                         errors={errors}
                         tipeOptions={tipeOptions}
+                        showKabKota={showKabKota}
+                        kabKotaOptions={kabKotaOptions}
+                        defaultKodeKota={defaultKodeKota}
                     />
 
                     <Form.Item className="mb-0 pt-2">

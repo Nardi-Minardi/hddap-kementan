@@ -6,9 +6,10 @@ import { Breadcrumb, Button, Card, Form, Space, Typography } from 'antd';
 
 const { Title } = Typography;
 
-export default function DokumenKegiatanCreate() {
+export default function DokumenKegiatanCreate({ subMenuOptions = [] }) {
     const { data, setData, post, processing, errors } = useForm({
         judul: '',
+        sub_menu_dokumen_id: subMenuOptions[0]?.value ?? null,
         deskripsi: '',
         file: null,
         cover: null,
@@ -22,24 +23,29 @@ export default function DokumenKegiatanCreate() {
     };
 
     return (
-        <AdminLayout title="Tambah Dokumen Kegiatan">
-            <Head title="Tambah Dokumen Kegiatan" />
+        <AdminLayout title="Tambah Dokumen">
+            <Head title="Tambah Dokumen" />
 
             <Breadcrumb
                 className="mb-4"
                 items={[
                     { href: route('dashboard'), title: <><HomeOutlined /> Dashboard</> },
-                    { href: route('admin.dokumen-kegiatan.index'), title: 'Dokumen Kegiatan' },
+                    { href: route('admin.dokumen-kegiatan.index'), title: 'Dokumen' },
                     { title: 'Tambah' },
                 ]}
             />
 
             <Card
                 className="max-w-3xl rounded-xl border border-gray-100 shadow-sm"
-                title={<Title level={5} className="!mb-0 !text-gray-800">Tambah Dokumen Kegiatan (PDF)</Title>}
+                title={<Title level={5} className="!mb-0 !text-gray-800">Tambah Dokumen (PDF)</Title>}
             >
                 <Form layout="vertical" onFinish={handleSubmit}>
-                    <DokumenKegiatanFormFields data={data} setData={setData} errors={errors} />
+                    <DokumenKegiatanFormFields
+                        data={data}
+                        setData={setData}
+                        errors={errors}
+                        subMenuOptions={subMenuOptions}
+                    />
 
                     <Form.Item className="mb-0 pt-2">
                         <Space>

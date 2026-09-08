@@ -18,7 +18,7 @@ function formatTanggal(value) {
     });
 }
 
-export default function DokumenKegiatanIndex({ dokumen, filters }) {
+export default function DokumenKegiatanIndex({ dokumen, filters, subMenuOptions = [] }) {
     const { flash } = usePage().props;
     const { can } = usePermissions();
     const [search, setSearch] = useState(filters.search || '');
@@ -52,6 +52,15 @@ export default function DokumenKegiatanIndex({ dokumen, filters }) {
                     <FilePdfOutlined className="text-xl text-red-500" />
                 </div>
             ),
+        },
+        {
+            title: 'Sub Menu',
+            dataIndex: ['sub_menu', 'nama'],
+            key: 'sub_menu',
+            width: 140,
+            render: (_, record) => record.sub_menu?.nama
+                ? <Tag color="blue">{record.sub_menu.nama}</Tag>
+                : <Tag>-</Tag>,
         },
         {
             title: 'Judul',
@@ -127,14 +136,14 @@ export default function DokumenKegiatanIndex({ dokumen, filters }) {
     ];
 
     return (
-        <AdminLayout title="Dokumen Kegiatan">
-            <Head title="Dokumen Kegiatan" />
+        <AdminLayout title="Dokumen">
+            <Head title="Dokumen" />
 
             <Breadcrumb
                 className="mb-4"
                 items={[
                     { href: route('dashboard'), title: <><HomeOutlined /> Dashboard</> },
-                    { title: 'Dokumen Kegiatan' },
+                    { title: 'Dokumen' },
                 ]}
             />
 
@@ -144,9 +153,17 @@ export default function DokumenKegiatanIndex({ dokumen, filters }) {
                     <div className="flex flex-wrap items-center justify-between gap-3 py-1">
                         <Title level={5} className="!mb-0 !text-gray-800">
                             <FilePdfOutlined className="mr-2 text-red-500" />
-                            Daftar Dokumen Kegiatan (PDF)
+                            Daftar Dokumen (PDF)
                         </Title>
                         <Space wrap>
+                            <Select
+                                allowClear
+                                placeholder="Filter sub menu"
+                                style={{ width: 180 }}
+                                value={filters.sub_menu_dokumen_id ? Number(filters.sub_menu_dokumen_id) : undefined}
+                                onChange={(val) => handleFilter({ sub_menu_dokumen_id: val ?? '' })}
+                                options={subMenuOptions}
+                            />
                             <Select
                                 allowClear
                                 placeholder="Filter status"

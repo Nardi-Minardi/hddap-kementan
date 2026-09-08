@@ -1,15 +1,22 @@
 import AdminLayout from '@/Layouts/AdminLayout';
-import BeritaFormFields from '@/Pages/Admin/Berita/FormFields';
+import BeritaFormFields, { fotoKegiatanFormFromRecord, transformBeritaForm } from '@/Pages/Admin/Berita/FormFields';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeftOutlined, HomeOutlined, SaveOutlined } from '@ant-design/icons';
 import { Breadcrumb, Button, Card, Form, Space, Typography } from 'antd';
 
 const { Title } = Typography;
 
-export default function BeritaEdit({ berita, tipeOptions = [] }) {
-    const { data, setData, post, processing, errors } = useForm({
+export default function BeritaEdit({
+    berita,
+    tipeOptions = [],
+    showKabKota = true,
+    kabKotaOptions = [],
+    defaultKodeKota = null,
+}) {
+    const { data, setData, post, processing, errors, transform } = useForm({
         judul: berita.judul ?? '',
         tipe: berita.tipe ?? 'berita',
+        kode_kota: berita.kode_kota ?? defaultKodeKota ?? null,
         ringkasan: berita.ringkasan ?? '',
         konten: berita.konten ?? '',
         image: null,
@@ -17,10 +24,12 @@ export default function BeritaEdit({ berita, tipeOptions = [] }) {
         published_at: berita.published_at ? berita.published_at.slice(0, 10) : null,
         is_published: !!berita.is_published,
         urutan: berita.urutan ?? 0,
+        foto_kegiatan: fotoKegiatanFormFromRecord(berita.foto_kegiatan ?? []),
         _method: 'put',
     });
 
     const handleSubmit = () => {
+        transform((formData) => transformBeritaForm(formData));
         post(route('admin.berita.update', berita.id), { forceFormData: true });
     };
 
@@ -47,7 +56,11 @@ export default function BeritaEdit({ berita, tipeOptions = [] }) {
                         setData={setData}
                         errors={errors}
                         existingImageUrl={berita.image_url}
+                        existingFotoKegiatan={berita.foto_kegiatan ?? []}
                         tipeOptions={tipeOptions}
+                        showKabKota={showKabKota}
+                        kabKotaOptions={kabKotaOptions}
+                        defaultKodeKota={defaultKodeKota}
                     />
 
                     <Form.Item className="mb-0 pt-2">

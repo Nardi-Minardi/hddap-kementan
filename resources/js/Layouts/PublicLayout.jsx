@@ -1,24 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-
-const navItems = [
-    { label: 'Beranda', href: '/#beranda' },
-    { label: 'Fitur', href: '/#fitur' },
-    { label: 'Berita', href: '/#berita' },
-    { label: 'Logframe', href: route('logframe'), routeName: 'logframe' },
-    { label: 'Sebaran CPCL', href: route('sebaran-cpcl'), routeName: 'sebaran-cpcl' },
-    { label: 'Statistik', href: route('statistik'), routeName: 'statistik' },
-    { label: 'Dokumen Kegiatan', href: route('dokumen-kegiatan'), routeName: 'dokumen-kegiatan' },
-    { label: 'Tentang', href: '/#tentang' },
-];
-
-function isNavActive(item) {
-    if (item.routeName) {
-        return route().current(item.routeName);
-    }
-
-    return false;
-}
+import { PublicNavDesktop, PublicNavMobile } from '@/Components/PublicNavMenu';
 
 export default function PublicLayout({ children }) {
     const { auth, social } = usePage().props;
@@ -35,20 +17,6 @@ export default function PublicLayout({ children }) {
             document.body.style.removeProperty('overflow');
         };
     }, [menuOpen]);
-
-    const navLinkClass = (item, mobile = false) => {
-        const active = isNavActive(item);
-
-        if (mobile) {
-            return active
-                ? 'border-green-600 bg-green-50 text-green-700'
-                : 'border-transparent text-gray-700 hover:bg-green-50 hover:text-green-700';
-        }
-
-        return active
-            ? 'border-green-600 text-green-700'
-            : 'border-transparent text-gray-600 hover:border-green-300 hover:text-green-600';
-    };
 
     return (
         <div className="min-h-screen overflow-x-hidden bg-gray-50 font-sans antialiased">
@@ -69,15 +37,7 @@ export default function PublicLayout({ children }) {
 
                         <div className="flex items-center gap-6">
                             <div className="hidden items-center gap-6 lg:flex">
-                                {navItems.map((item) => (
-                                    <a
-                                        key={item.label}
-                                        href={item.href}
-                                        className={`inline-flex h-10 items-center border-b-2 text-base font-medium transition ${navLinkClass(item)}`}
-                                    >
-                                        {item.label}
-                                    </a>
-                                ))}
+                                <PublicNavDesktop />
                             </div>
 
                             <div className="flex shrink-0 items-center gap-2">
@@ -152,16 +112,7 @@ export default function PublicLayout({ children }) {
                 </div>
 
                 <nav className="flex-1 overflow-y-auto px-4 py-4">
-                    {navItems.map((item) => (
-                        <a
-                            key={item.label}
-                            href={item.href}
-                            className={`block rounded-lg border-b-2 px-3 py-3 text-base font-medium transition ${navLinkClass(item, true)}`}
-                            onClick={() => setMenuOpen(false)}
-                        >
-                            {item.label}
-                        </a>
-                    ))}
+                    <PublicNavMobile onNavigate={() => setMenuOpen(false)} />
                 </nav>
 
                 <div className="shrink-0 space-y-2 border-t border-gray-100 px-4 py-4">

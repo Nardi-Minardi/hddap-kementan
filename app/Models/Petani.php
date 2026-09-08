@@ -18,6 +18,9 @@ class Petani extends Model
         'usia_petani',
         'difabel',
         'alamat_petani',
+        'Latitude',
+        'Longitude',
+        'foto_lahan',
         'kode_kota',
         'kode_poktan',
         'jmlah_petani',
@@ -29,6 +32,8 @@ class Petani extends Model
         'kode_kota' => 'integer',
         'kode_poktan' => 'integer',
         'jmlah_petani' => 'integer',
+        'Latitude' => 'float',
+        'Longitude' => 'float',
     ];
 
     public function kkPetani(): HasMany
@@ -39,6 +44,11 @@ class Petani extends Model
     public function poktan(): BelongsTo
     {
         return $this->belongsTo(Poktan::class, 'kode_poktan');
+    }
+
+    public function kabKota(): BelongsTo
+    {
+        return $this->belongsTo(KabKota::class, 'kode_kota', 'code');
     }
 
     public function scopeWithCoordinates($query)

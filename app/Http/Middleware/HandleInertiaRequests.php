@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\AdminPermissionSyncService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -29,6 +30,11 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        if ($request->user()?->isAdmin()) {
+            AdminPermissionSyncService::syncIfNeeded();
+            $request->user()->load(['role', 'permissions', 'kabKotas']);
+        }
+
         return [
             ...parent::share($request),
             'auth' => [
@@ -49,6 +55,7 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error'   => fn () => $request->session()->get('error'),
+                'focus_peserta' => fn () => $request->session()->get('focus_peserta'),
             ],
             'social' => [
                 'youtube'   => config('services.social.youtube_url'),

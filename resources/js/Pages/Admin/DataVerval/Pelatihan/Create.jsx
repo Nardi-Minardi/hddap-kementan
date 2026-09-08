@@ -7,22 +7,17 @@ import {
     Card,
     Form,
     Input,
-    InputNumber,
-    Select,
     Space,
     Typography,
 } from 'antd';
 
 const { Title } = Typography;
 
-export default function PelatihanCreate({ jenisPelatihanOptions = [] }) {
+export default function PelatihanCreate() {
     const { data, setData, post, processing, errors } = useForm({
-        kdjenis: null,
-        tanggal: '',
-        lokasi: '',
-        jumlah_jpl: null,
-        laki_laki: null,
-        perempuan: null,
+        komponen: '',
+        nama_kegiatan: '',
+        kode_owp: '',
     });
 
     const handleSubmit = () => {
@@ -30,111 +25,65 @@ export default function PelatihanCreate({ jenisPelatihanOptions = [] }) {
     };
 
     return (
-        <AdminLayout title="Tambah Pelatihan">
-            <Head title="Tambah Pelatihan" />
+        <AdminLayout title="Tambah management topik">
+            <Head title="Tambah management topik" />
 
             <Breadcrumb
                 className="mb-4"
                 items={[
                     { href: route('dashboard'), title: <><HomeOutlined /> Dashboard</> },
-                    { href: route('admin.data-verval.pelatihan.index'), title: 'Pelatihan' },
+                    { href: route('admin.data-verval.pelatihan.index'), title: 'Management Topik' },
                     { title: 'Tambah' },
                 ]}
             />
 
             <Card
                 className="rounded-xl border border-gray-100 shadow-sm"
-                title={<Title level={5} className="!mb-0 !text-gray-800">Tambah Data Pelatihan</Title>}
+                title={<Title level={5} className="!mb-0 !text-gray-800">Tambah Management Topik</Title>}
             >
-                <Form layout="vertical" onFinish={handleSubmit} className="max-w-xl">
+                <Form layout="vertical" onFinish={handleSubmit} className="max-w-2xl">
                     <Form.Item
-                        label="Jenis Pelatihan"
+                        label="Komponen"
                         required
-                        validateStatus={errors.kdjenis ? 'error' : ''}
-                        help={errors.kdjenis}
-                    >
-                        <Select
-                            showSearch
-                            allowClear
-                            placeholder="Pilih jenis pelatihan"
-                            size="large"
-                            value={data.kdjenis}
-                            onChange={(value) => setData('kdjenis', value ?? null)}
-                            options={jenisPelatihanOptions}
-                            optionFilterProp="label"
-                        />
-                    </Form.Item>
-
-                    <Form.Item
-                        label="Tanggal"
-                        required
-                        validateStatus={errors.tanggal ? 'error' : ''}
-                        help={errors.tanggal}
+                        validateStatus={errors.komponen ? 'error' : ''}
+                        help={errors.komponen}
                     >
                         <Input
-                            type="date"
-                            value={data.tanggal}
-                            onChange={(e) => setData('tanggal', e.target.value)}
-                            size="large"
-                        />
-                    </Form.Item>
-
-                    <Form.Item
-                        label="Lokasi"
-                        required
-                        validateStatus={errors.lokasi ? 'error' : ''}
-                        help={errors.lokasi}
-                    >
-                        <Input
-                            value={data.lokasi}
-                            onChange={(e) => setData('lokasi', e.target.value)}
-                            placeholder="Contoh: Aula Dinas Pertanian"
+                            value={data.komponen}
+                            onChange={(e) => setData('komponen', e.target.value)}
+                            placeholder="Contoh: Komponen 1"
                             maxLength={100}
                             size="large"
                         />
                     </Form.Item>
 
                     <Form.Item
-                        label="Jumlah JPL"
+                        label="Item Kegiatan"
                         required
-                        validateStatus={errors.jumlah_jpl ? 'error' : ''}
-                        help={errors.jumlah_jpl}
+                        validateStatus={errors.nama_kegiatan ? 'error' : ''}
+                        help={errors.nama_kegiatan}
                     >
-                        <InputNumber
-                            className="w-full"
-                            min={0}
-                            value={data.jumlah_jpl}
-                            onChange={(value) => setData('jumlah_jpl', value)}
+                        <Input.TextArea
+                            value={data.nama_kegiatan}
+                            onChange={(e) => setData('nama_kegiatan', e.target.value)}
+                            placeholder="Nama kegiatan bimtek/sosialisasi/pelatihan"
+                            maxLength={255}
+                            rows={3}
                             size="large"
                         />
                     </Form.Item>
 
                     <Form.Item
-                        label="Laki-laki"
+                        label="Kode Komponen OWP"
                         required
-                        validateStatus={errors.laki_laki ? 'error' : ''}
-                        help={errors.laki_laki}
+                        validateStatus={errors.kode_owp ? 'error' : ''}
+                        help={errors.kode_owp}
                     >
-                        <InputNumber
-                            className="w-full"
-                            min={0}
-                            value={data.laki_laki}
-                            onChange={(value) => setData('laki_laki', value)}
-                            size="large"
-                        />
-                    </Form.Item>
-
-                    <Form.Item
-                        label="Perempuan"
-                        required
-                        validateStatus={errors.perempuan ? 'error' : ''}
-                        help={errors.perempuan}
-                    >
-                        <InputNumber
-                            className="w-full"
-                            min={0}
-                            value={data.perempuan}
-                            onChange={(value) => setData('perempuan', value)}
+                        <Input
+                            value={data.kode_owp}
+                            onChange={(e) => setData('kode_owp', e.target.value)}
+                            placeholder="Contoh: 1.1.3.1"
+                            maxLength={20}
                             size="large"
                         />
                     </Form.Item>

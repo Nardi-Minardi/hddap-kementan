@@ -6,9 +6,10 @@ import { Breadcrumb, Button, Card, Form, Space, Typography } from 'antd';
 
 const { Title } = Typography;
 
-export default function DokumenKegiatanEdit({ dokumen }) {
+export default function DokumenKegiatanEdit({ dokumen, subMenuOptions = [] }) {
     const { data, setData, post, processing, errors } = useForm({
         judul: dokumen.judul ?? '',
+        sub_menu_dokumen_id: dokumen.sub_menu_dokumen_id ?? null,
         deskripsi: dokumen.deskripsi ?? '',
         file: null,
         cover: null,
@@ -23,27 +24,28 @@ export default function DokumenKegiatanEdit({ dokumen }) {
     };
 
     return (
-        <AdminLayout title="Edit Dokumen Kegiatan">
-            <Head title="Edit Dokumen Kegiatan" />
+        <AdminLayout title="Edit Dokumen">
+            <Head title="Edit Dokumen" />
 
             <Breadcrumb
                 className="mb-4"
                 items={[
                     { href: route('dashboard'), title: <><HomeOutlined /> Dashboard</> },
-                    { href: route('admin.dokumen-kegiatan.index'), title: 'Dokumen Kegiatan' },
+                    { href: route('admin.dokumen-kegiatan.index'), title: 'Dokumen' },
                     { title: 'Edit' },
                 ]}
             />
 
             <Card
                 className="max-w-3xl rounded-xl border border-gray-100 shadow-sm"
-                title={<Title level={5} className="!mb-0 !text-gray-800">Edit Dokumen Kegiatan</Title>}
+                title={<Title level={5} className="!mb-0 !text-gray-800">Edit Dokumen</Title>}
             >
                 <Form layout="vertical" onFinish={handleSubmit}>
                     <DokumenKegiatanFormFields
                         data={data}
                         setData={setData}
                         errors={errors}
+                        subMenuOptions={subMenuOptions}
                         existingFileUrl={dokumen.file_url}
                         existingCoverUrl={dokumen.cover_url}
                         isEdit

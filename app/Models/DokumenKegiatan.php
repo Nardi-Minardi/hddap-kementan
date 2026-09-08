@@ -13,6 +13,7 @@ class DokumenKegiatan extends Model
     protected $fillable = [
         'judul',
         'slug',
+        'sub_menu_dokumen_id',
         'deskripsi',
         'file_path',
         'cover_path',
@@ -33,6 +34,11 @@ class DokumenKegiatan extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function subMenu(): BelongsTo
+    {
+        return $this->belongsTo(SubMenuDokumen::class, 'sub_menu_dokumen_id');
     }
 
     public function scopePublished(Builder $query): Builder

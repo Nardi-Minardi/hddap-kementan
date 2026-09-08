@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\JenisPelatihan;
 use App\Models\Pelatihan;
 use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
@@ -15,32 +14,26 @@ class PelatihanController extends Controller
 {
     public function index(Request $request): Response
     {
-        $query = Pelatihan::query()
-            ->with('jenisPelatihan')
-            ->orderByDesc('kd_pelatihan');
+        $query = Pelatihan::query()->orderBy('kode_owp');
 
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('lokasi', 'ilike', "%{$search}%")
-                    ->orWhereHas('jenisPelatihan', function ($jenisQuery) use ($search) {
-                        $jenisQuery->where('jenis_pelatihan', 'ilike', "%{$search}%")
-                            ->orWhere('nama_pelatihan', 'ilike', "%{$search}%");
-                    });
+                $q->where('komponen', 'ilike', "%{$search}%")
+                    ->orWhere('nama_kegiatan', 'ilike', "%{$search}%")
+                    ->orWhere('kode_owp', 'ilike', "%{$search}%");
             });
         }
 
         return Inertia::render('Admin/DataVerval/Pelatihan/Index', [
-            'pelatihan' => $query->paginate(10)->withQueryString(),
+            'pelatihan' => $query->paginate(50)->withQueryString(),
             'filters' => $request->only('search'),
         ]);
     }
 
     public function create(): Response
     {
-        return Inertia::render('Admin/DataVerval/Pelatihan/Create', [
-            'jenisPelatihanOptions' => $this->jenisPelatihanOptions(),
-        ]);
+        return Inertia::render('Admin/DataVerval/Pelatihan/Create');
     }
 
     public function store(Request $request): RedirectResponse
@@ -50,7 +43,7 @@ class PelatihanController extends Controller
 
         ActivityLogger::log(
             aksi: 'create',
-            deskripsi: "Membuat data pelatihan: {$validated['lokasi']}",
+            deskripsi: "Membuat data pelatihan: {$validated['nama_kegiatan']}",
             metadata: $validated,
         );
 
@@ -60,22 +53,19 @@ class PelatihanController extends Controller
 
     public function edit(Pelatihan $pelatihan): Response
     {
-        $pelatihan->load('jenisPelatihan');
-
         return Inertia::render('Admin/DataVerval/Pelatihan/Edit', [
             'pelatihan' => $pelatihan,
-            'jenisPelatihanOptions' => $this->jenisPelatihanOptions(),
         ]);
     }
 
     public function update(Request $request, Pelatihan $pelatihan): RedirectResponse
     {
-        $validated = $this->validatedData($request);
+        $validated = $this->validatedData($request, $pelatihan);
         $pelatihan->update($validated);
 
         ActivityLogger::log(
             aksi: 'update',
-            deskripsi: "Memperbarui data pelatihan: {$pelatihan->lokasi}",
+            deskripsi: "Memperbarui data pelatihan: {$pelatihan->nama_kegiatan}",
             subject: $pelatihan,
         );
 
@@ -85,14 +75,14 @@ class PelatihanController extends Controller
 
     public function destroy(Pelatihan $pelatihan): RedirectResponse
     {
-        $lokasi = $pelatihan->lokasi;
+        $namaKegiatan = $pelatihan->nama_kegiatan;
         $kdPelatihan = $pelatihan->kd_pelatihan;
 
         $pelatihan->delete();
 
         ActivityLogger::log(
             aksi: 'delete',
-            deskripsi: "Menghapus data pelatihan: {$lokasi}",
+            deskripsi: "Menghapus data pelatihan: {$namaKegiatan}",
             metadata: ['deleted_pelatihan_kd_pelatihan' => $kdPelatihan],
         );
 
@@ -100,28 +90,18 @@ class PelatihanController extends Controller
             ->with('success', 'Data pelatihan berhasil dihapus.');
     }
 
-    private function validatedData(Request $request): array
+    private function validatedData(Request $request, ?Pelatihan $pelatihan = null): array
     {
-        return $request->validate([
-            'kdjenis' => 'required|exists:tr_jns_pelatihan,kdjenis',
-            'tanggal' => 'required|date',
-            'lokasi' => 'required|string|max:100',
-            'jumlah_jpl' => 'required|integer|min:0',
-            'laki_laki' => 'required|integer|min:0',
-            'perempuan' => 'required|integer|min:0',
-        ]);
-    }
+        $kodeOwpRule = 'required|string|max:20|unique:tr_pelatihan,kode_owp';
 
-    private function jenisPelatihanOptions(): array
-    {
-        return JenisPelatihan::query()
-            ->orderBy('kdjenis')
-            ->get(['kdjenis', 'jenis_pelatihan', 'nama_pelatihan'])
-            ->map(fn (JenisPelatihan $item) => [
-                'value' => $item->kdjenis,
-                'label' => "{$item->jenis_pelatihan} — {$item->nama_pelatihan}",
-            ])
-            ->values()
-            ->all();
+        if ($pelatihan !== null) {
+            $kodeOwpRule .= ',' . $pelatihan->kd_pelatihan . ',kd_pelatihan';
+        }
+
+        return $request->validate([
+            'komponen' => 'required|string|max:100',
+            'nama_kegiatan' => 'required|string|max:255',
+            'kode_owp' => $kodeOwpRule,
+        ]);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\KabKota;
 use App\Models\User;
+use App\Models\Provinsi;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -174,11 +175,46 @@ class UserScopeService
             ->orderBy('name')
             ->get(['code', 'name'])
             ->map(fn (KabKota $item) => [
-                'value' => $item->code,
+                'value' => (int) $item->code,
                 'label' => $item->name,
             ])
             ->values()
             ->all();
+    }
+
+    /** @return \Illuminate\Database\Eloquent\Collection<int, Provinsi> */
+    public function provinsiOptions()
+    {
+        return Provinsi::query()
+            ->whereIn('code', KabKota::query()
+                ->whereIn('code', $this->allowedKabKotaCodes())
+                ->distinct()
+                ->pluck('provinsi_code'))
+            ->orderBy('name')
+            ->get(['code', 'name']);
+    }
+
+    /**
+     * Batasi query petani ke 13 kab/kota intervensi HDDAP (dan penugasan user).
+     *
+     * @param  Builder<\Illuminate\Database\Eloquent\Model>  $query
+     * @return Builder<\Illuminate\Database\Eloquent\Model>
+     */
+    public function applyHddapPetaniScope(Builder $query): Builder
+    {
+        $codes = $this->allowedKabKotaIntCodes();
+
+        if ($codes === []) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->where(function ($q) use ($codes) {
+            $q->whereIn('kode_kota', $codes)
+                ->orWhere(function ($inner) use ($codes) {
+                    $inner->whereNull('kode_kota')
+                        ->whereHas('poktan', fn ($poktanQuery) => $poktanQuery->whereIn('kode_kota', $codes));
+                });
+        });
     }
 
     /** @return list<string> */
@@ -225,6 +261,12 @@ class UserScopeService
             'admin.dokumen-kegiatan.edit' => 'dokumen-kegiatan.update',
             'admin.dokumen-kegiatan.update' => 'dokumen-kegiatan.update',
             'admin.dokumen-kegiatan.destroy' => 'dokumen-kegiatan.delete',
+            'admin.sub-menu-dokumen.index' => 'sub-menu-dokumen.view',
+            'admin.sub-menu-dokumen.create' => 'sub-menu-dokumen.create',
+            'admin.sub-menu-dokumen.store' => 'sub-menu-dokumen.create',
+            'admin.sub-menu-dokumen.edit' => 'sub-menu-dokumen.update',
+            'admin.sub-menu-dokumen.update' => 'sub-menu-dokumen.update',
+            'admin.sub-menu-dokumen.destroy' => 'sub-menu-dokumen.delete',
             'admin.provinsi.index' => 'provinsi.view',
             'admin.kab-kota.index' => 'kab-kota.view',
             'admin.kecamatan.index' => 'kecamatan.view',
@@ -249,8 +291,14 @@ class UserScopeService
             'admin.kelompok-petani.destroy' => 'kelompok-petani.delete',
             'admin.kelompok-petani.anggota' => 'kelompok-petani.view',
             'admin.kelompok-petani.api.kab-kota' => 'kelompok-petani.view',
-            'admin.kelompok-petani.api.kecamatan' => 'kelompok-petani.view',
-            'admin.kelompok-petani.api.kel-des' => 'kelompok-petani.view',
+            'admin.kelompok-petani.api.cluster' => 'kelompok-petani.view',
+            'admin.cluster.index' => 'cluster.view',
+            'admin.cluster.poktan' => 'cluster.view',
+            'admin.cluster.create' => 'cluster.create',
+            'admin.cluster.store' => 'cluster.create',
+            'admin.cluster.edit' => 'cluster.update',
+            'admin.cluster.update' => 'cluster.update',
+            'admin.cluster.destroy' => 'cluster.delete',
             'admin.petani.index' => 'petani.view',
             'admin.petani.create' => 'petani.create',
             'admin.petani.store' => 'petani.create',
@@ -258,6 +306,11 @@ class UserScopeService
             'admin.petani.update' => 'petani.update',
             'admin.petani.destroy' => 'petani.delete',
             'admin.petani.keluarga' => 'petani.view',
+            'admin.petani.keluarga.store' => 'petani.update',
+            'admin.petani.keluarga.update' => 'petani.update',
+            'admin.petani.keluarga.destroy' => 'petani.delete',
+            'admin.petani.api.cluster' => 'petani.view',
+            'admin.petani.api.poktan' => 'petani.view',
             'admin.pendamping.index' => 'pendamping.view',
             'admin.pendamping.create' => 'pendamping.create',
             'admin.pendamping.store' => 'pendamping.create',
@@ -270,6 +323,12 @@ class UserScopeService
             'admin.data-verval.jenis-pelatihan.edit' => 'jenis-pelatihan.update',
             'admin.data-verval.jenis-pelatihan.update' => 'jenis-pelatihan.update',
             'admin.data-verval.jenis-pelatihan.destroy' => 'jenis-pelatihan.delete',
+            'admin.data-verval.jenis-pelatihan.api.kab-kota' => 'jenis-pelatihan.view',
+            'admin.data-verval.jenis-pelatihan.api.cluster' => 'jenis-pelatihan.view',
+            'admin.data-verval.jenis-pelatihan.api.poktan' => 'jenis-pelatihan.view',
+            'admin.data-verval.jenis-pelatihan.api.petani' => 'jenis-pelatihan.view',
+            'admin.data-verval.jenis-pelatihan.peserta.store' => 'jenis-pelatihan.update',
+            'admin.data-verval.jenis-pelatihan.peserta.destroy' => 'jenis-pelatihan.update',
             'admin.data-verval.pelatihan.index' => 'pelatihan.view',
             'admin.data-verval.pelatihan.create' => 'pelatihan.create',
             'admin.data-verval.pelatihan.store' => 'pelatihan.create',
@@ -278,7 +337,13 @@ class UserScopeService
             'admin.data-verval.pelatihan.destroy' => 'pelatihan.delete',
             'admin.kelembagaan-poktan.index' => 'kelembagaan-poktan.view',
             'admin.koperasi.index' => 'koperasi.view',
-            'admin.bintek.index' => 'bintek.view',
+            'admin.keuangan.index' => 'input-keuangan.view',
+            'admin.keuangan.awp.store' => 'input-keuangan.create',
+            'admin.keuangan.awp.update' => 'input-keuangan.update',
+            'admin.keuangan.awp.destroy' => 'input-keuangan.delete',
+            'admin.keuangan.transaksi.store' => 'input-keuangan.create',
+            'admin.keuangan.transaksi.destroy' => 'input-keuangan.delete',
+            'admin.keuangan.rekonsiliasi.store' => 'input-keuangan.create',
             'admin.monev-fisik.index' => 'monev-fisik.view',
             'admin.logframe.index' => 'logframe.view',
             'admin.logframe.create' => 'logframe.create',
@@ -287,6 +352,11 @@ class UserScopeService
             'admin.logframe.update' => 'logframe.update',
             'admin.logframe.destroy' => 'logframe.delete',
             'admin.activity-log.index' => 'activity-log.view',
+            'admin.database-backup.index' => 'database-backup.view',
+            'admin.database-backup.store' => 'database-backup.create',
+            'admin.database-backup.download' => 'database-backup.view',
+            'admin.database-backup.restore' => 'database-backup.restore',
+            'admin.database-backup.destroy' => 'database-backup.delete',
         ];
 
         return $map[$routeName] ?? null;

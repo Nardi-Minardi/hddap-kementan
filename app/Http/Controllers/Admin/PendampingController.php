@@ -80,7 +80,7 @@ class PendampingController extends Controller
         );
 
         return redirect()->route('admin.pendamping.index')
-            ->with('success', 'Data pendamping berhasil dibuat.');
+            ->with('success', 'Data fasilitator berhasil dibuat.');
     }
 
     public function edit(Pendamping $pendamping): Response
@@ -112,7 +112,7 @@ class PendampingController extends Controller
         );
 
         return redirect()->route('admin.pendamping.index')
-            ->with('success', 'Data pendamping berhasil diperbarui.');
+            ->with('success', 'Data fasilitator berhasil diperbarui.');
     }
 
     public function destroy(Pendamping $pendamping): RedirectResponse
@@ -131,7 +131,7 @@ class PendampingController extends Controller
         );
 
         return redirect()->route('admin.pendamping.index')
-            ->with('success', 'Data pendamping berhasil dihapus.');
+            ->with('success', 'Data fasilitator berhasil dihapus.');
     }
 
     private function validatedData(Request $request): array

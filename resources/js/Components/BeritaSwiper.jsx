@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import BeritaKontenRenderer from '@/Components/BeritaKontenRenderer';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
@@ -173,7 +174,7 @@ export default function BeritaSwiper({ items = [] }) {
                     role="presentation"
                 >
                     <div
-                        className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl"
+                        className="relative max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-sm bg-[#faf9f6] shadow-2xl ring-1 ring-gray-300"
                         onClick={(e) => e.stopPropagation()}
                         role="dialog"
                         aria-modal="true"
@@ -183,7 +184,7 @@ export default function BeritaSwiper({ items = [] }) {
                             type="button"
                             onClick={() => setActiveBerita(null)}
                             aria-label="Tutup"
-                            className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-gray-600 shadow transition hover:bg-white hover:text-gray-900"
+                            className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-gray-600 shadow transition hover:bg-white hover:text-gray-900"
                         >
                             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -193,24 +194,38 @@ export default function BeritaSwiper({ items = [] }) {
                         <img
                             src={activeBerita.image_url}
                             alt={activeBerita.judul}
-                            className="h-52 w-full object-cover sm:h-64"
+                            className="h-48 w-full border-b-2 border-gray-900 object-cover sm:h-56"
                         />
 
-                        <div className="p-6 sm:p-8">
-                            {activeBerita.published_at && (
-                                <p className="text-xs font-medium text-gray-400">
-                                    {formatTanggal(activeBerita.published_at)}
-                                </p>
-                            )}
-                            <h3 id="berita-modal-title" className="mt-2 text-2xl font-bold text-gray-900">
+                        <div className="border-b border-gray-300 bg-white px-6 py-4 sm:px-10">
+                            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 pb-3">
+                                <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-green-800">
+                                    Berita HDDAP
+                                </span>
+                                {activeBerita.published_at && (
+                                    <p className="text-[11px] font-medium uppercase tracking-wide text-gray-500">
+                                        {formatTanggal(activeBerita.published_at)}
+                                    </p>
+                                )}
+                            </div>
+                            <h3
+                                id="berita-modal-title"
+                                className="mt-4 font-serif text-2xl font-bold leading-tight text-gray-900 sm:text-3xl"
+                            >
                                 {activeBerita.judul}
                             </h3>
                             {activeBerita.ringkasan && (
-                                <p className="mt-3 text-sm font-medium text-green-700">{activeBerita.ringkasan}</p>
+                                <p className="mt-3 border-l-4 border-green-700 pl-3 font-serif text-sm font-semibold italic leading-relaxed text-gray-700">
+                                    {activeBerita.ringkasan}
+                                </p>
                             )}
-                            {activeBerita.konten && (
-                                <p className="mt-4 text-sm leading-relaxed text-gray-600">{activeBerita.konten}</p>
-                            )}
+                        </div>
+
+                        <div className="px-6 pb-8 pt-2 sm:px-10">
+                            <BeritaKontenRenderer
+                                konten={activeBerita.konten}
+                                fotoKegiatan={activeBerita.foto_kegiatan}
+                            />
                         </div>
                     </div>
                 </div>

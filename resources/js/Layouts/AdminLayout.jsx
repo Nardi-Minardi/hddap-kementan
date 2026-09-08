@@ -26,6 +26,8 @@ import {
     UsergroupAddOutlined,
     FileTextOutlined,
     BookOutlined,
+    FolderOutlined,
+    AccountBookOutlined,
 } from '@ant-design/icons';
 
 const { Header, Sider, Content } = Layout;
@@ -105,36 +107,36 @@ export default function AdminLayout({ children, title }) {
                     label: <Link href={route('admin.roles.index')}>Roles</Link>,
                 },
                 {
-                    key: '/admin/kelompok-petani',
-                    icon: <UsergroupAddOutlined />,
-                    label: <Link href={route('admin.kelompok-petani.index')}>Kelompok Petani</Link>,
-                },
-                {
-                    key: '/admin/petani',
-                    icon: <UserOutlined />,
-                    label: <Link href={route('admin.petani.index')}>Petani</Link>,
-                },
-                {
                     key: '/admin/pendamping',
                     icon: <SolutionOutlined />,
-                    label: <Link href={route('admin.pendamping.index')}>Pendamping</Link>,
+                    label: <Link href={route('admin.pendamping.index')}>Fasilitator</Link>,
                 },
             ],
         },
         {
+            key: '/admin/data-petani',
+            icon: <UsergroupAddOutlined />,
+            label: <Link href={route('admin.data-petani.index')}>Data Petani</Link>,
+        },
+        {
+            key: '/admin/keuangan',
+            icon: <AccountBookOutlined />,
+            label: <Link href={route('admin.keuangan.index')}>Input Keuangan</Link>,
+        },
+        {
             key: 'data-pelatihan',
             icon: <BarChartOutlined />,
-            label: 'Data Pelatihan',
+            label: 'Kegiatan Bimtek/Sosialisasi',
             children: [
-                {
-                    key: '/admin/data-verval/jenis-pelatihan',
-                    icon: <ReadOutlined />,
-                    label: <Link href={route('admin.data-verval.jenis-pelatihan.index')}>Jenis Pelatihan</Link>,
-                },
                 {
                     key: '/admin/data-verval/pelatihan',
                     icon: <ReadOutlined />,
-                    label: <Link href={route('admin.data-verval.pelatihan.index')}>Pelatihan</Link>,
+                    label: <Link href={route('admin.data-verval.pelatihan.index')}>Management topik</Link>,
+                },
+                {
+                    key: '/admin/data-verval/jenis-pelatihan',
+                    icon: <ReadOutlined />,
+                    label: <Link href={route('admin.data-verval.jenis-pelatihan.index')}>Management event</Link>,
                 },
             ],
         },
@@ -144,9 +146,21 @@ export default function AdminLayout({ children, title }) {
             label: <Link href={route('admin.berita.index')}>Berita & Agenda</Link>,
         },
         {
-            key: '/admin/dokumen-kegiatan',
+            key: 'dokumen',
             icon: <BookOutlined />,
-            label: <Link href={route('admin.dokumen-kegiatan.index')}>Dokumen Kegiatan</Link>,
+            label: 'Dokumen',
+            children: [
+                {
+                    key: '/admin/sub-menu-dokumen',
+                    icon: <FolderOutlined />,
+                    label: <Link href={route('admin.sub-menu-dokumen.index')}>Sub Menu Dokumen</Link>,
+                },
+                {
+                    key: '/admin/dokumen-kegiatan',
+                    icon: <FileTextOutlined />,
+                    label: <Link href={route('admin.dokumen-kegiatan.index')}>Daftar Dokumen</Link>,
+                },
+            ],
         },
         {
             key: '/admin/kelembagaan-poktan',
@@ -157,11 +171,6 @@ export default function AdminLayout({ children, title }) {
             key: '/admin/koperasi',
             icon: <ShopOutlined />,
             label: <Link href={route('admin.koperasi.index')}>Koperasi</Link>,
-        },
-        {
-            key: '/admin/bintek',
-            icon: <ReadOutlined />,
-            label: <Link href={route('admin.bintek.index')}>Bintek</Link>,
         },
         {
             key: '/admin/monev-fisik',
@@ -177,6 +186,11 @@ export default function AdminLayout({ children, title }) {
             key: '/admin/activity-log',
             icon: <HistoryOutlined />,
             label: <Link href={route('admin.activity-log.index')}>Activity Log</Link>,
+        },
+        {
+            key: '/admin/database-backup',
+            icon: <DatabaseOutlined />,
+            label: <Link href={route('admin.database-backup.index')}>Backup dan Restore Database</Link>,
         },
         ];
 
@@ -197,21 +211,25 @@ export default function AdminLayout({ children, title }) {
         if (pathname.startsWith('/admin/kab-kota')) return ['/admin/kab-kota'];
         if (pathname.startsWith('/admin/kecamatan')) return ['/admin/kecamatan'];
         if (pathname.startsWith('/admin/kel-des')) return ['/admin/kel-des'];
-        if (pathname.startsWith('/admin/kelompok-petani')) return ['/admin/kelompok-petani'];
-        if (pathname.startsWith('/admin/petani')) return ['/admin/petani'];
+        if (pathname.startsWith('/admin/cluster')) return ['/admin/data-petani'];
+        if (pathname.startsWith('/admin/kelompok-petani')) return ['/admin/data-petani'];
+        if (pathname.startsWith('/admin/petani')) return ['/admin/data-petani'];
+        if (pathname.startsWith('/admin/data-petani')) return ['/admin/data-petani'];
         if (pathname.startsWith('/admin/pendamping')) return ['/admin/pendamping'];
+        if (pathname.startsWith('/admin/keuangan')) return ['/admin/keuangan'];
         if (pathname.startsWith('/admin/data-verval/jenis-pelatihan')) return ['/admin/data-verval/jenis-pelatihan'];
         if (pathname.startsWith('/admin/data-verval/pelatihan')) return ['/admin/data-verval/pelatihan'];
         if (pathname.startsWith('/admin/kelembagaan-poktan')) return ['/admin/kelembagaan-poktan'];
         if (pathname.startsWith('/admin/koperasi')) return ['/admin/koperasi'];
-        if (pathname.startsWith('/admin/bintek')) return ['/admin/bintek'];
         if (pathname.startsWith('/admin/monev-fisik')) return ['/admin/monev-fisik'];
         if (pathname.startsWith('/admin/logframe')) return ['/admin/logframe'];
         if (pathname.startsWith('/admin/activity-log')) return ['/admin/activity-log'];
+        if (pathname.startsWith('/admin/database-backup')) return ['/admin/database-backup'];
         if (pathname.startsWith('/admin/profile')) return ['/admin/profile'];
         if (pathname.startsWith('/admin/dashboard')) return ['/admin/dashboard'];
         if (pathname.startsWith('/admin/berita')) return ['/admin/berita'];
         if (pathname.startsWith('/admin/dokumen-kegiatan')) return ['/admin/dokumen-kegiatan'];
+        if (pathname.startsWith('/admin/sub-menu-dokumen')) return ['/admin/sub-menu-dokumen'];
         return ['/admin/dashboard'];
     };
 
@@ -220,10 +238,9 @@ export default function AdminLayout({ children, title }) {
         if (pathname.startsWith('/admin/provinsi') || pathname.startsWith('/admin/kab-kota') ||
             pathname.startsWith('/admin/kecamatan') || pathname.startsWith('/admin/kel-des')) return ['wilayah'];
         if (pathname.startsWith('/admin/users') || pathname.startsWith('/admin/roles') ||
-            pathname.startsWith('/admin/kelompok-petani') ||
-            pathname.startsWith('/admin/petani') ||
             pathname.startsWith('/admin/pendamping')) return ['master'];
         if (pathname.startsWith('/admin/data-verval')) return ['data-pelatihan'];
+        if (pathname.startsWith('/admin/sub-menu-dokumen') || pathname.startsWith('/admin/dokumen-kegiatan')) return ['dokumen'];
         return [];
     };
 

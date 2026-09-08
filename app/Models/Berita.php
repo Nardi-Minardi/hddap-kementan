@@ -17,9 +17,11 @@ class Berita extends Model
         'judul',
         'slug',
         'tipe',
+        'kode_kota',
         'ringkasan',
         'konten',
         'image_url',
+        'foto_kegiatan',
         'published_at',
         'is_published',
         'user_id',
@@ -30,7 +32,14 @@ class Berita extends Model
         'published_at' => 'datetime',
         'is_published' => 'boolean',
         'urutan' => 'integer',
+        'kode_kota' => 'integer',
+        'foto_kegiatan' => 'array',
     ];
+
+    public function kabKota(): BelongsTo
+    {
+        return $this->belongsTo(KabKota::class, 'kode_kota', 'code');
+    }
 
     public function user(): BelongsTo
     {

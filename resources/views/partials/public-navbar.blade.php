@@ -4,9 +4,15 @@
         ['label' => 'Fitur', 'href' => url('/#fitur')],
         ['label' => 'Berita', 'href' => url('/#berita')],
         ['label' => 'Logframe', 'href' => route('logframe'), 'active' => request()->routeIs('logframe')],
-        ['label' => 'Sebaran CPCL', 'href' => route('sebaran-cpcl'), 'active' => request()->routeIs('sebaran-cpcl')],
-        ['label' => 'Statistik', 'href' => route('statistik'), 'active' => request()->routeIs('statistik')],
-        ['label' => 'Dokumen Kegiatan', 'href' => route('dokumen-kegiatan'), 'active' => request()->routeIs('dokumen-kegiatan')],
+        [
+            'label' => 'Dashboard',
+            'active' => request()->routeIs('sebaran-cpcl', 'statistik'),
+            'children' => [
+                ['label' => 'Sebaran CPCL', 'href' => route('sebaran-cpcl'), 'active' => request()->routeIs('sebaran-cpcl')],
+                ['label' => 'Statistik', 'href' => route('statistik'), 'active' => request()->routeIs('statistik')],
+            ],
+        ],
+        ['label' => 'Dokumen', 'href' => route('dokumen-kegiatan'), 'active' => request()->routeIs('dokumen-kegiatan')],
         ['label' => 'Tentang', 'href' => url('/#tentang')],
     ];
 @endphp
@@ -29,12 +35,38 @@
             <div class="flex items-center gap-6">
                 <div class="hidden lg:flex items-center gap-6">
                     @foreach ($navItems as $item)
-                        <a
-                            href="{{ $item['href'] }}"
-                            class="inline-flex h-10 items-center border-b-2 text-base font-medium transition hover:border-green-300 hover:text-green-600 {{ !empty($item['active']) ? 'border-green-600 text-green-700' : 'border-transparent text-gray-600' }}"
-                        >
-                            {{ $item['label'] }}
-                        </a>
+                        @if (!empty($item['children']))
+                            <div class="public-nav-dropdown relative group">
+                                <button
+                                    type="button"
+                                    class="inline-flex h-10 items-center gap-1 border-b-2 text-base font-medium transition hover:border-green-300 hover:text-green-600 {{ !empty($item['active']) ? 'border-green-600 text-green-700' : 'border-transparent text-gray-600' }}"
+                                >
+                                    {{ $item['label'] }}
+                                    <svg class="h-4 w-4 transition group-hover:rotate-180 group-focus-within:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+                                <div class="public-nav-dropdown-menu invisible absolute left-0 top-full z-50 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                                    <div class="min-w-[220px] overflow-hidden rounded-xl border border-gray-100 bg-white py-1 shadow-lg">
+                                        @foreach ($item['children'] as $child)
+                                            <a
+                                                href="{{ $child['href'] }}"
+                                                class="block px-4 py-2.5 text-sm font-medium transition hover:bg-green-50 hover:text-green-700 {{ !empty($child['active']) ? 'bg-green-50 text-green-700' : 'text-gray-700' }}"
+                                            >
+                                                {{ $child['label'] }}
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        @else
+                            <a
+                                href="{{ $item['href'] }}"
+                                class="inline-flex h-10 items-center border-b-2 text-base font-medium transition hover:border-green-300 hover:text-green-600 {{ !empty($item['active']) ? 'border-green-600 text-green-700' : 'border-transparent text-gray-600' }}"
+                            >
+                                {{ $item['label'] }}
+                            </a>
+                        @endif
                     @endforeach
                 </div>
 
@@ -110,12 +142,36 @@
 
     <nav class="flex-1 overflow-y-auto px-4 py-4">
         @foreach ($navItems as $item)
-            <a
-                href="{{ $item['href'] }}"
-                class="block rounded-lg border-b-2 px-3 py-3 text-base font-medium transition hover:bg-green-50 hover:text-green-700 {{ !empty($item['active']) ? 'border-green-600 bg-green-50 text-green-700' : 'border-transparent text-gray-700' }}"
-            >
-                {{ $item['label'] }}
-            </a>
+            @if (!empty($item['children']))
+                <div class="mobile-nav-group mb-1">
+                    <button
+                        type="button"
+                        class="mobile-nav-group-toggle flex w-full items-center justify-between rounded-lg border-b-2 px-3 py-3 text-base font-medium transition hover:bg-green-50 hover:text-green-700 {{ !empty($item['active']) ? 'border-green-600 bg-green-50 text-green-700' : 'border-transparent text-gray-700' }}"
+                    >
+                        <span>{{ $item['label'] }}</span>
+                        <svg class="mobile-nav-group-icon h-4 w-4 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div class="mobile-nav-group-items ml-3 mt-1 hidden space-y-1 border-l-2 border-green-100 pl-3">
+                        @foreach ($item['children'] as $child)
+                            <a
+                                href="{{ $child['href'] }}"
+                                class="block rounded-lg px-3 py-2 text-sm font-medium transition hover:bg-green-50 hover:text-green-700 {{ !empty($child['active']) ? 'bg-green-50 text-green-700' : 'text-gray-600' }}"
+                            >
+                                {{ $child['label'] }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            @else
+                <a
+                    href="{{ $item['href'] }}"
+                    class="block rounded-lg border-b-2 px-3 py-3 text-base font-medium transition hover:bg-green-50 hover:text-green-700 {{ !empty($item['active']) ? 'border-green-600 bg-green-50 text-green-700' : 'border-transparent text-gray-700' }}"
+                >
+                    {{ $item['label'] }}
+                </a>
+            @endif
         @endforeach
     </nav>
 
@@ -184,6 +240,22 @@
 
         menu.querySelectorAll('a').forEach((link) => {
             link.addEventListener('click', closeMenu);
+        });
+
+        menu.querySelectorAll('.mobile-nav-group-toggle').forEach((button) => {
+            button.addEventListener('click', () => {
+                const group = button.closest('.mobile-nav-group');
+                const items = group?.querySelector('.mobile-nav-group-items');
+                const icon = group?.querySelector('.mobile-nav-group-icon');
+
+                if (!items) {
+                    return;
+                }
+
+                const expanded = !items.classList.contains('hidden');
+                items.classList.toggle('hidden', expanded);
+                icon?.classList.toggle('rotate-180', !expanded);
+            });
         });
     })();
 </script>

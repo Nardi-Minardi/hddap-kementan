@@ -59,14 +59,67 @@ export default function JenisPelatihanIndex({ jenisPelatihan, filters }) {
                 (jenisPelatihan.current_page - 1) * jenisPelatihan.per_page + index + 1,
         },
         {
-            title: 'Jenis Pelatihan',
-            dataIndex: 'jenis_pelatihan',
-            key: 'jenis_pelatihan',
+            title: 'Jenis Topik',
+            key: 'jenis_topik',
+            ellipsis: true,
+            render: (_, record) =>
+                record.pelatihan_topik?.nama_kegiatan
+                || record.jenis_pelatihan
+                || '-',
         },
         {
-            title: 'Nama Pelatihan',
+            title: 'Nama Acara',
             dataIndex: 'nama_pelatihan',
             key: 'nama_pelatihan',
+        },
+        {
+            title: 'Metode',
+            dataIndex: 'metode_acara',
+            key: 'metode_acara',
+            width: 110,
+            render: (value) => value || '-',
+        },
+        {
+            title: 'Lokasi',
+            key: 'lokasi',
+            render: (_, record) => record.kab_kota?.name ?? '-',
+        },
+        {
+            title: 'Tanggal Mulai',
+            dataIndex: 'tanggal_mulai',
+            key: 'tanggal_mulai',
+            width: 130,
+            render: (value) => {
+                if (!value) {
+                    return '-';
+                }
+
+                return new Date(`${value}T00:00:00`).toLocaleDateString('id-ID');
+            },
+        },
+        {
+            title: 'Jumlah Peserta',
+            dataIndex: 'jumlah_peserta',
+            key: 'jumlah_peserta',
+            width: 120,
+            align: 'center',
+            render: (value) => value ?? 0,
+        },
+        {
+            title: 'Laki-laki',
+            dataIndex: 'jumlah_laki_laki',
+            key: 'jumlah_laki_laki',
+            width: 100,
+            align: 'center',
+            render: (value) => value ?? 0,
+        },
+        {
+            title: 'Perempuan',
+            dataIndex: 'jumlah_perempuan',
+            key: 'jumlah_perempuan',
+            width: 100,
+            align: 'center',
+            render: (value) => value ?? 0,
         },
         {
             title: 'Aksi',
@@ -102,15 +155,15 @@ export default function JenisPelatihanIndex({ jenisPelatihan, filters }) {
     ];
 
     return (
-        <AdminLayout title="Jenis Pelatihan">
-            <Head title="Jenis Pelatihan" />
+        <AdminLayout title="Management event">
+            <Head title="Management event" />
 
             <Breadcrumb
                 className="mb-4"
                 items={[
                     { href: route('dashboard'), title: <><HomeOutlined /> Dashboard</> },
-                    { title: 'Data Pelatihan' },
-                    { title: 'Jenis Pelatihan' },
+                    { title: 'Kegiatan Bimtek/Sosialisasi' },
+                    { title: 'Management event' },
                 ]}
             />
 
@@ -120,7 +173,7 @@ export default function JenisPelatihanIndex({ jenisPelatihan, filters }) {
                     <div className="flex flex-wrap items-center justify-between gap-3 py-1">
                         <Title level={5} className="!mb-0 !text-gray-800">
                             <ReadOutlined className="mr-2 text-emerald-500" />
-                            Daftar Jenis Pelatihan
+                            Daftar Management event
                         </Title>
                         <Space wrap>
                             <Input.Search
@@ -138,7 +191,7 @@ export default function JenisPelatihanIndex({ jenisPelatihan, filters }) {
                                     icon={<PlusOutlined />}
                                     className="!border-emerald-500 !bg-emerald-500 hover:!bg-emerald-600"
                                 >
-                                    Tambah Jenis Pelatihan
+                                    Tambah Event
                                 </Button>
                             </Link>
                         </Space>
@@ -149,6 +202,7 @@ export default function JenisPelatihanIndex({ jenisPelatihan, filters }) {
                     dataSource={jenisPelatihan.data}
                     columns={columns}
                     rowKey="kdjenis"
+                    scroll={{ x: 1200 }}
                     pagination={{
                         current: jenisPelatihan.current_page,
                         total: jenisPelatihan.total,

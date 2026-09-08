@@ -2,17 +2,8 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import BeritaSwiper from '@/Components/BeritaSwiper';
-
-const navItems = [
-    { label: 'Beranda', href: '#beranda' },
-    { label: 'Fitur', href: '#fitur' },
-    { label: 'Berita', href: '#berita' },
-    { label: 'Logframe', href: '/logframe', external: true },
-    { label: 'Sebaran CPCL', href: '/sebaran-cpcl', external: true },
-    { label: 'Statistik', href: '/statistik', external: true },
-    { label: 'Dokumen Kegiatan', href: '/dokumen-kegiatan', external: true },
-    { label: 'Tentang', href: '#tentang' },
-];
+import { PublicNavDesktop, PublicNavMobile } from '@/Components/PublicNavMenu';
+import { welcomeNavItems } from '@/config/publicNav';
 
 const featureHeaderVariants = {
     hidden: { opacity: 0, y: 28 },
@@ -100,9 +91,9 @@ export default function Welcome({ auth, canLogin, canRegister, berita = [], home
     }, [activeHeroSlide, heroVideos.length]);
 
     useEffect(() => {
-        const sectionIds = navItems
-            .filter((item) => item.href.startsWith('#'))
-            .map((item) => item.href.slice(1));
+        const sectionIds = welcomeNavItems
+            .filter((item) => item.sectionId)
+            .map((item) => item.sectionId);
 
         const sections = sectionIds
             .map((id) => document.getElementById(id))
@@ -129,30 +120,6 @@ export default function Welcome({ auth, canLogin, canRegister, berita = [], home
 
         return () => observer.disconnect();
     }, []);
-
-    const isNavItemActive = (item) => item.href.startsWith('#') && activeSection === item.href.slice(1);
-
-    const getDesktopNavClass = (item) => {
-        const active = isNavItemActive(item);
-
-        if (scrolled) {
-            return active
-                ? 'border-green-600 text-green-700'
-                : 'border-transparent text-gray-600 hover:border-green-300 hover:text-green-600';
-        }
-
-        return active
-            ? 'border-green-400 text-white'
-            : 'border-transparent text-white/80 hover:border-green-300 hover:text-green-400';
-    };
-
-    const getMobileNavClass = (item) => {
-        const active = isNavItemActive(item);
-
-        return active
-            ? 'border-green-600 bg-green-50 text-green-700'
-            : 'border-transparent text-gray-700 hover:bg-green-50 hover:text-green-700';
-    };
 
     const goToHeroSlide = (index) => {
         setActiveHeroSlide(index);
@@ -299,15 +266,7 @@ export default function Welcome({ auth, canLogin, canRegister, berita = [], home
                             {/* Nav links + Auth */}
                             <div className="flex items-center gap-6">
                                 <div className="hidden lg:flex items-center gap-6">
-                                    {navItems.map((item) => (
-                                        <a
-                                            key={item.label}
-                                            href={item.href}
-                                            className={`inline-flex h-10 items-center border-b-2 text-base font-medium transition ${getDesktopNavClass(item)}`}
-                                        >
-                                            {item.label}
-                                        </a>
-                                    ))}
+                                    <PublicNavDesktop variant="welcome" scrolled={scrolled} activeSection={activeSection} items={welcomeNavItems} />
                                 </div>
 
                                 <div className="flex shrink-0 items-center gap-2">
@@ -400,16 +359,11 @@ export default function Welcome({ auth, canLogin, canRegister, berita = [], home
                     </div>
 
                     <nav className="flex-1 overflow-y-auto px-4 py-4">
-                        {navItems.map((item) => (
-                            <a
-                                key={item.label}
-                                href={item.href}
-                                className={`block rounded-lg border-b-2 px-3 py-3 text-base font-medium transition ${getMobileNavClass(item)}`}
-                                onClick={() => setMenuOpen(false)}
-                            >
-                                {item.label}
-                            </a>
-                        ))}
+                        <PublicNavMobile
+                            items={welcomeNavItems}
+                            activeSection={activeSection}
+                            onNavigate={() => setMenuOpen(false)}
+                        />
                     </nav>
 
                     <div className="shrink-0 space-y-2 border-t border-gray-100 px-4 py-4">
@@ -659,7 +613,7 @@ export default function Welcome({ auth, canLogin, canRegister, berita = [], home
                             <span className="block text-green-300">Indonesia dengan lebih baik</span>
                         </h2>
                         <p className="mt-5 text-lg text-green-100/80">
-                            Bergabunglah bersama ribuan petugas pertanian di seluruh Indonesia yang telah menggunakan Horticulture Development in Dryland Areas Project untuk mewujudkan pertanian yang modern dan berdaya saing.
+                            Horticulture Development in Dryland Areas Project untuk mewujudkan pertanian yang modern dan berdaya saing.
                         </p>
                         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
                             {auth.user ? (

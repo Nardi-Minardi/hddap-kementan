@@ -453,7 +453,7 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/egulias/EmailValidator/zipball/d42c8731f0624ad6bdc8d3e5e9a4524f68801cfa",
                 "reference": "d42c8731f0624ad6bdc8d3e5e9a4524f68801cfa",
-                "shasum": ""
+                "shasum": ""    
             },
             "require": {
                 "doctrine/lexer": "^2.0 || ^3.0",

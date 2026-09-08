@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\Relations\CastBelongsTo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class Cluster extends Model
@@ -23,6 +25,22 @@ class Cluster extends Model
         'kode_kota' => 'integer',
         'kode_kumoditas' => 'integer',
     ];
+
+    public function kabKota(): CastBelongsTo
+    {
+        return new CastBelongsTo(
+            (new KabKota())->newQuery(),
+            $this,
+            'kode_kota',
+            'code',
+            'kabKota',
+        );
+    }
+
+    public function poktan(): HasMany
+    {
+        return $this->hasMany(Poktan::class, 'kode_cluster');
+    }
 
     public function kumoditas(): BelongsTo
     {

@@ -81,6 +81,12 @@ export default function BeritaIndex({ berita, filters, tipeOptions = [] }) {
             ),
         },
         {
+            title: 'Lokasi',
+            key: 'lokasi',
+            width: 160,
+            render: (_, record) => record.kab_kota?.name ?? '-',
+        },
+        {
             title: 'Tanggal',
             dataIndex: 'published_at',
             key: 'published_at',

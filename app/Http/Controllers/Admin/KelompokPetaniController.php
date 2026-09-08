@@ -3,10 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Cluster;
 use App\Models\KabKota;
-use App\Models\KelompokPetani;
-use App\Models\Kecamatan;
-use App\Models\KelDes;
 use App\Models\Petani;
 use App\Models\Poktan;
 use App\Models\Provinsi;
@@ -14,12 +12,24 @@ use App\Services\UserScopeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class KelompokPetaniController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): RedirectResponse
+    {
+        return redirect()->route('admin.data-petani.index', array_merge(
+            ['tab' => 'kelompok-petani'],
+            $request->query(),
+        ));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function indexProps(Request $request): array
     {
         $scope = UserScopeService::current();
         $query = Poktan::query()
@@ -85,12 +95,86 @@ class KelompokPetaniController extends Controller
                 ->get(['code', 'name'])
             : collect();
 
-        return Inertia::render('Admin/KelompokPetani/Index', [
+        return [
             'poktan' => $query->paginate(20)->withQueryString(),
             'provinsis' => $provinsis,
             'kabKotas' => $kabKotas,
             'filters' => $request->only('search', 'provinsi_code', 'kode_kota'),
+        ];
+    }
+
+    public function create(): Response
+    {
+        return Inertia::render('Admin/KelompokPetani/Create', [
+            'provinsis' => $this->scopedProvinsis(),
         ]);
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $this->validatePoktan($request);
+
+        Poktan::create([
+            'kode_kota' => $validated['kode_kota'],
+            'kode_cluster' => $validated['kode_cluster'],
+            'nama_poktan' => $validated['nama_poktan'],
+            'ketua' => $validated['ketua'] ?? null,
+            'telp' => $validated['telp'] ?? null,
+            'alamat' => $validated['alamat'] ?? null,
+        ]);
+
+        return redirect()->route('admin.data-petani.index', ['tab' => 'kelompok-petani'])
+            ->with('success', 'Kelompok petani berhasil ditambahkan.');
+    }
+
+    public function edit(Poktan $kelompokPetani): Response
+    {
+        UserScopeService::current()->ensureCanAccessKabKota($kelompokPetani->kode_kota);
+
+        $kelompokPetani->load([
+            'cluster:id,nama_cluster,kode_kota',
+            'kabKota:id,code,name,provinsi_code',
+            'kabKota.provinsi:id,code,name',
+        ]);
+
+        return Inertia::render('Admin/KelompokPetani/Edit', [
+            'poktan' => $kelompokPetani,
+            'provinsis' => $this->scopedProvinsis(),
+        ]);
+    }
+
+    public function update(Request $request, Poktan $kelompokPetani): RedirectResponse
+    {
+        UserScopeService::current()->ensureCanAccessKabKota($kelompokPetani->kode_kota);
+
+        $validated = $this->validatePoktan($request);
+
+        $kelompokPetani->update([
+            'kode_kota' => $validated['kode_kota'],
+            'kode_cluster' => $validated['kode_cluster'],
+            'nama_poktan' => $validated['nama_poktan'],
+            'ketua' => $validated['ketua'] ?? null,
+            'telp' => $validated['telp'] ?? null,
+            'alamat' => $validated['alamat'] ?? null,
+        ]);
+
+        return redirect()->route('admin.data-petani.index', ['tab' => 'kelompok-petani'])
+            ->with('success', 'Kelompok petani berhasil diperbarui.');
+    }
+
+    public function destroy(Poktan $kelompokPetani): RedirectResponse
+    {
+        UserScopeService::current()->ensureCanAccessKabKota($kelompokPetani->kode_kota);
+
+        if ($kelompokPetani->petani()->exists()) {
+            return redirect()->route('admin.data-petani.index', ['tab' => 'kelompok-petani'])
+                ->with('error', 'Kelompok petani tidak dapat dihapus karena masih memiliki anggota petani.');
+        }
+
+        $kelompokPetani->delete();
+
+        return redirect()->route('admin.data-petani.index', ['tab' => 'kelompok-petani'])
+            ->with('success', 'Kelompok petani berhasil dihapus.');
     }
 
     public function anggota(Poktan $poktan): JsonResponse
@@ -123,154 +207,76 @@ class KelompokPetaniController extends Controller
         ]);
     }
 
-    public function create(): Response
-    {
-        return Inertia::render('Admin/KelompokPetani/Create', [
-            'provinsis' => Provinsi::orderBy('name')->get(['id', 'code', 'name']),
-        ]);
-    }
-
-    public function store(Request $request): RedirectResponse
-    {
-        $validated = $request->validate([
-            'provinsi_id'                  => 'nullable|exists:m_provinsi,id',
-            'kab_kota_id'                  => 'nullable|exists:m_kab_kota,id',
-            'kecamatan_id'                 => 'nullable|exists:m_kecamatan,id',
-            'kel_des_id'                   => 'nullable|exists:m_kel_des,id',
-            'nama_poktan'                  => 'required|string|max:255',
-            'luas_layanan_poktan'          => 'nullable|numeric|min:0',
-            'tahun_pembentukan'            => 'nullable|integer|min:1900|max:' . now()->year,
-            'diketahui_pic'                => 'nullable|string|max:255',
-            'sk_bupati'                    => 'nullable|string|max:255',
-            'akte_notaris'                 => 'nullable|string|max:255',
-            'ket_terdaftar_pengadilan'     => 'nullable|string|max:255',
-            'nama_ketua_poktan'            => 'nullable|string|max:255',
-            'no_hp_ketua_poktan'           => 'nullable|string|max:20',
-            'gender_ketua_poktan'          => 'nullable|in:L,P',
-            'gender_wakil_poktan'          => 'nullable|in:L,P',
-            'gender_sekretaris_poktan'     => 'nullable|in:L,P',
-            'gender_bendahara_poktan'      => 'nullable|in:L,P',
-            'jumlah_pengurus_poktan'       => 'nullable|integer|min:0',
-            'jumlah_anggota_poktan'        => 'nullable|integer|min:0',
-            'jumlah_anggota_pria_poktan'   => 'nullable|integer|min:0',
-            'jumlah_anggota_wanita_poktan' => 'nullable|integer|min:0',
-            'ad_art'                       => 'nullable|string|max:255',
-            'alamat_kantor_sekretariat'    => 'nullable|string',
-            'pengisian_buku'               => 'nullable|string|max:255',
-            'iuran'                        => 'nullable|string|max:255',
-            'keterangan'                   => 'nullable|string',
-        ]);
-
-        if (!empty($validated['provinsi_id'])) {
-            $provinsi = Provinsi::find($validated['provinsi_id']);
-            $validated['provinsi_name'] = $provinsi?->name;
-        }
-        if (!empty($validated['kab_kota_id'])) {
-            $kabKota = KabKota::find($validated['kab_kota_id']);
-            $validated['kab_kota_name'] = $kabKota?->name;
-        }
-        if (!empty($validated['kecamatan_id'])) {
-            $kecamatan = Kecamatan::find($validated['kecamatan_id']);
-            $validated['kecamatan_name'] = $kecamatan?->name;
-        }
-        if (!empty($validated['kel_des_id'])) {
-            $kelDes = KelDes::find($validated['kel_des_id']);
-            $validated['kel_des_name'] = $kelDes?->name;
-        }
-
-        KelompokPetani::create($validated);
-
-        return redirect()->route('admin.kelompok-petani.index')
-            ->with('success', 'Kelompok petani berhasil ditambahkan.');
-    }
-
-    public function edit(KelompokPetani $kelompokPetani): Response
-    {
-        return Inertia::render('Admin/KelompokPetani/Edit', [
-            'poktan'    => $kelompokPetani,
-            'provinsis' => Provinsi::orderBy('name')->get(['id', 'code', 'name']),
-        ]);
-    }
-
-    public function update(Request $request, KelompokPetani $kelompokPetani): RedirectResponse
-    {
-        $validated = $request->validate([
-            'provinsi_id'                  => 'nullable|exists:m_provinsi,id',
-            'kab_kota_id'                  => 'nullable|exists:m_kab_kota,id',
-            'kecamatan_id'                 => 'nullable|exists:m_kecamatan,id',
-            'kel_des_id'                   => 'nullable|exists:m_kel_des,id',
-            'nama_poktan'                  => 'required|string|max:255',
-            'luas_layanan_poktan'          => 'nullable|numeric|min:0',
-            'tahun_pembentukan'            => 'nullable|integer|min:1900|max:' . now()->year,
-            'diketahui_pic'                => 'nullable|string|max:255',
-            'sk_bupati'                    => 'nullable|string|max:255',
-            'akte_notaris'                 => 'nullable|string|max:255',
-            'ket_terdaftar_pengadilan'     => 'nullable|string|max:255',
-            'nama_ketua_poktan'            => 'nullable|string|max:255',
-            'no_hp_ketua_poktan'           => 'nullable|string|max:20',
-            'gender_ketua_poktan'          => 'nullable|in:L,P',
-            'gender_wakil_poktan'          => 'nullable|in:L,P',
-            'gender_sekretaris_poktan'     => 'nullable|in:L,P',
-            'gender_bendahara_poktan'      => 'nullable|in:L,P',
-            'jumlah_pengurus_poktan'       => 'nullable|integer|min:0',
-            'jumlah_anggota_poktan'        => 'nullable|integer|min:0',
-            'jumlah_anggota_pria_poktan'   => 'nullable|integer|min:0',
-            'jumlah_anggota_wanita_poktan' => 'nullable|integer|min:0',
-            'ad_art'                       => 'nullable|string|max:255',
-            'alamat_kantor_sekretariat'    => 'nullable|string',
-            'pengisian_buku'               => 'nullable|string|max:255',
-            'iuran'                        => 'nullable|string|max:255',
-            'keterangan'                   => 'nullable|string',
-        ]);
-
-        if (!empty($validated['provinsi_id'])) {
-            $validated['provinsi_name'] = Provinsi::find($validated['provinsi_id'])?->name;
-        }
-        if (!empty($validated['kab_kota_id'])) {
-            $validated['kab_kota_name'] = KabKota::find($validated['kab_kota_id'])?->name;
-        }
-        if (!empty($validated['kecamatan_id'])) {
-            $validated['kecamatan_name'] = Kecamatan::find($validated['kecamatan_id'])?->name;
-        }
-        if (!empty($validated['kel_des_id'])) {
-            $validated['kel_des_name'] = KelDes::find($validated['kel_des_id'])?->name;
-        }
-
-        $kelompokPetani->update($validated);
-
-        return redirect()->route('admin.kelompok-petani.index')
-            ->with('success', 'Kelompok petani berhasil diperbarui.');
-    }
-
-    public function destroy(KelompokPetani $kelompokPetani): RedirectResponse
-    {
-        $kelompokPetani->delete();
-
-        return redirect()->route('admin.kelompok-petani.index')
-            ->with('success', 'Kelompok petani berhasil dihapus.');
-    }
-
     public function kabKotaByProvinsi(Request $request): JsonResponse
     {
-        $provinsi = Provinsi::findOrFail($request->provinsi_id);
-        $data = KabKota::where('provinsi_code', $provinsi->code)->orderBy('name')->get(['id', 'name']);
+        $scope = UserScopeService::current();
+
+        $query = KabKota::query()
+            ->whereIn('code', $scope->allowedKabKotaCodes())
+            ->orderBy('name');
+
+        if ($request->filled('provinsi_code')) {
+            $request->validate([
+                'provinsi_code' => 'required|string|exists:m_provinsi,code',
+            ]);
+
+            $query->where('provinsi_code', $request->provinsi_code);
+        }
+
+        return response()->json($query->get(['code', 'name']));
+    }
+
+    public function clustersByKabKota(Request $request): JsonResponse
+    {
+        $request->validate([
+            'kode_kota' => 'required|integer|exists:m_kab_kota,code',
+        ]);
+
+        UserScopeService::current()->ensureCanAccessKabKota((int) $request->kode_kota);
+
+        $data = Cluster::query()
+            ->where('kode_kota', (int) $request->kode_kota)
+            ->orderBy('nama_cluster')
+            ->get(['id', 'nama_cluster']);
 
         return response()->json($data);
     }
 
-    public function kecamatanByKabKota(Request $request): JsonResponse
+    private function scopedProvinsis()
     {
-        $kabKota = KabKota::findOrFail($request->kab_kota_id);
-        $data = Kecamatan::where('kab_kota_code', $kabKota->code)->orderBy('name')->get(['id', 'name']);
+        $scope = UserScopeService::current();
+        $hddapKabCodes = $scope->allowedKabKotaCodes();
 
-        return response()->json($data);
+        return Provinsi::query()
+            ->whereIn('code', KabKota::query()
+                ->whereIn('code', $hddapKabCodes)
+                ->distinct()
+                ->pluck('provinsi_code'))
+            ->orderBy('name')
+            ->get(['code', 'name']);
     }
 
-    public function kelDesByKecamatan(Request $request): JsonResponse
+    private function validatePoktan(Request $request): array
     {
-        $kecamatan = Kecamatan::findOrFail($request->kecamatan_id);
-        $data = KelDes::where('kecamatan_code', $kecamatan->code)->orderBy('name')->get(['id', 'name']);
+        $validated = $request->validate([
+            'kode_kota' => 'required|integer|exists:m_kab_kota,code',
+            'kode_cluster' => 'required|integer|exists:m_cluster,id',
+            'nama_poktan' => 'required|string|max:255',
+            'ketua' => 'nullable|string|max:255',
+            'telp' => 'nullable|string|max:30',
+            'alamat' => 'nullable|string|max:500',
+        ]);
 
-        return response()->json($data);
+        UserScopeService::current()->ensureCanAccessKabKota((int) $validated['kode_kota']);
+
+        $cluster = Cluster::find($validated['kode_cluster']);
+
+        if (!$cluster || (int) $cluster->kode_kota !== (int) $validated['kode_kota']) {
+            throw ValidationException::withMessages([
+                'kode_cluster' => 'Cluster tidak sesuai dengan Kab/Kota yang dipilih.',
+            ]);
+        }
+
+        return $validated;
     }
 }

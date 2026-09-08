@@ -1,16 +1,34 @@
-import { Form, Input, InputNumber, Switch, Upload, Button } from 'antd';
+import { Form, Input, InputNumber, Switch, Upload, Button, Select } from 'antd';
 import { UploadOutlined, FilePdfOutlined } from '@ant-design/icons';
 
 export default function DokumenKegiatanFormFields({
     data,
     setData,
     errors,
+    subMenuOptions = [],
     existingFileUrl = null,
     existingCoverUrl = null,
     isEdit = false,
 }) {
     return (
         <>
+            <Form.Item
+                label="Sub Menu Dokumen"
+                required
+                validateStatus={errors.sub_menu_dokumen_id ? 'error' : ''}
+                help={errors.sub_menu_dokumen_id || 'Pilih kategori sub menu tempat dokumen ini ditampilkan.'}
+            >
+                <Select
+                    size="large"
+                    placeholder="Pilih sub menu dokumen"
+                    value={data.sub_menu_dokumen_id || undefined}
+                    onChange={(val) => setData('sub_menu_dokumen_id', val)}
+                    options={subMenuOptions}
+                    showSearch
+                    optionFilterProp="label"
+                />
+            </Form.Item>
+
             <Form.Item
                 label="Judul Dokumen"
                 required

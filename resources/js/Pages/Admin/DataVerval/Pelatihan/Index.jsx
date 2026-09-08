@@ -25,18 +25,6 @@ import { usePage } from '@inertiajs/react';
 
 const { Title } = Typography;
 
-function formatDate(value) {
-    if (!value) {
-        return '-';
-    }
-
-    return new Date(value).toLocaleDateString('id-ID', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-    });
-}
-
 export default function PelatihanIndex({ pelatihan, filters }) {
     const { flash } = usePage().props;
     const [search, setSearch] = useState(filters.search || '');
@@ -71,54 +59,22 @@ export default function PelatihanIndex({ pelatihan, filters }) {
                 (pelatihan.current_page - 1) * pelatihan.per_page + index + 1,
         },
         {
-            title: 'Jenis Pelatihan',
-            key: 'jenis_pelatihan',
-            render: (_, record) => record.jenis_pelatihan?.jenis_pelatihan || '-',
-        },
-        {
-            title: 'Nama Pelatihan',
-            key: 'nama_pelatihan',
-            render: (_, record) => record.jenis_pelatihan?.nama_pelatihan || '-',
-        },
-        {
-            title: 'Tanggal',
-            dataIndex: 'tanggal',
-            key: 'tanggal',
+            title: 'Komponen',
+            dataIndex: 'komponen',
+            key: 'komponen',
             width: 130,
-            render: (value) => formatDate(value),
         },
         {
-            title: 'Lokasi',
-            dataIndex: 'lokasi',
-            key: 'lokasi',
+            title: 'Item Kegiatan',
+            dataIndex: 'nama_kegiatan',
+            key: 'nama_kegiatan',
+            ellipsis: true,
         },
         {
-            title: 'Jumlah JPL',
-            dataIndex: 'jumlah_jpl',
-            key: 'jumlah_jpl',
+            title: 'Kode OWP',
+            dataIndex: 'kode_owp',
+            key: 'kode_owp',
             width: 110,
-            align: 'center',
-        },
-        {
-            title: 'Laki-laki',
-            dataIndex: 'laki_laki',
-            key: 'laki_laki',
-            width: 100,
-            align: 'center',
-        },
-        {
-            title: 'Perempuan',
-            dataIndex: 'perempuan',
-            key: 'perempuan',
-            width: 100,
-            align: 'center',
-        },
-        {
-            title: 'Total',
-            key: 'total_peserta',
-            width: 90,
-            align: 'center',
-            render: (_, record) => (record.laki_laki ?? 0) + (record.perempuan ?? 0),
         },
         {
             title: 'Aksi',
@@ -155,15 +111,15 @@ export default function PelatihanIndex({ pelatihan, filters }) {
     ];
 
     return (
-        <AdminLayout title="Pelatihan">
-            <Head title="Pelatihan" />
+        <AdminLayout title="Management Topik">
+            <Head title="Management Topik" />
 
             <Breadcrumb
                 className="mb-4"
                 items={[
                     { href: route('dashboard'), title: <><HomeOutlined /> Dashboard</> },
-                    { title: 'Data Pelatihan' },
-                    { title: 'Pelatihan' },
+                    { title: 'Kegiatan Bimtek/Sosialisasi' },
+                    { title: 'Management Topik' },
                 ]}
             />
 
@@ -173,17 +129,17 @@ export default function PelatihanIndex({ pelatihan, filters }) {
                     <div className="flex flex-wrap items-center justify-between gap-3 py-1">
                         <Title level={5} className="!mb-0 !text-gray-800">
                             <ReadOutlined className="mr-2 text-emerald-500" />
-                            Daftar Pelatihan
+                            Daftar Management Topik
                         </Title>
                         <Space wrap>
                             <Input.Search
                                 allowClear
-                                placeholder="Cari lokasi atau jenis pelatihan..."
+                                placeholder="Cari komponen, kegiatan, atau kode OWP..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 onSearch={handleSearch}
                                 enterButton={<SearchOutlined />}
-                                style={{ width: 280 }}
+                                style={{ width: 320 }}
                             />
                             <Link href={route('admin.data-verval.pelatihan.create')}>
                                 <Button
@@ -191,7 +147,7 @@ export default function PelatihanIndex({ pelatihan, filters }) {
                                     icon={<PlusOutlined />}
                                     className="!border-emerald-500 !bg-emerald-500 hover:!bg-emerald-600"
                                 >
-                                    Tambah Pelatihan
+                                    Tambah Topik
                                 </Button>
                             </Link>
                         </Space>
@@ -202,7 +158,7 @@ export default function PelatihanIndex({ pelatihan, filters }) {
                     dataSource={pelatihan.data}
                     columns={columns}
                     rowKey="kd_pelatihan"
-                    scroll={{ x: 1100 }}
+                    scroll={{ x: 900 }}
                     pagination={{
                         current: pelatihan.current_page,
                         total: pelatihan.total,

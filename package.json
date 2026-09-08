@@ -27,6 +27,7 @@
         "@ant-design/icons": "^6.1.1",
         "antd": "^6.3.5",
         "framer-motion": "^12.42.0",
+        "leaflet": "^1.9.4",
         "pdfjs-dist": "^6.2.108",
         "react-pageflip": "^2.0.3",
         "swiper": "^14.0.1"

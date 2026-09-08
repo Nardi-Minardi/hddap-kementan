@@ -14,6 +14,6 @@ class BeritaController extends Controller
             ->where('is_published', true)
             ->orderByDesc('urutan')
             ->orderByDesc('published_at')
-            ->get(['id', 'judul', 'slug', 'tipe', 'ringkasan', 'konten', 'image_url', 'published_at']);
+            ->get(['id', 'judul', 'slug', 'tipe', 'ringkasan', 'konten', 'image_url', 'foto_kegiatan', 'published_at']);
     }
 }

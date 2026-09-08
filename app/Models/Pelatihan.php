@@ -18,6 +18,9 @@ class Pelatihan extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'komponen',
+        'nama_kegiatan',
+        'kode_owp',
         'kdjenis',
         'tanggal',
         'lokasi',
@@ -41,9 +44,13 @@ class Pelatihan extends Model
         ];
     }
 
-    public function getTotalPesertaAttribute(): int
+    public function getTotalPesertaAttribute(): ?int
     {
-        return (int) $this->laki_laki + (int) $this->perempuan;
+        if ($this->laki_laki === null && $this->perempuan === null) {
+            return null;
+        }
+
+        return (int) ($this->laki_laki ?? 0) + (int) ($this->perempuan ?? 0);
     }
 
     public function jenisPelatihan(): BelongsTo

@@ -84,7 +84,7 @@ export default function PendampingIndex({
     const handleDelete = (no) => {
         router.delete(route('admin.pendamping.destroy', no), {
             preserveScroll: true,
-            onSuccess: () => message.success('Data pendamping berhasil dihapus.'),
+            onSuccess: () => message.success('Data fasilitator berhasil dihapus.'),
         });
     };
 
@@ -149,7 +149,7 @@ export default function PendampingIndex({
                         />
                     </Tooltip>
                     <Popconfirm
-                        title="Hapus data pendamping ini?"
+                        title="Hapus data fasilitator ini?"
                         description="Data yang dihapus tidak dapat dikembalikan."
                         okText="Hapus"
                         okType="danger"
@@ -166,15 +166,15 @@ export default function PendampingIndex({
     ];
 
     return (
-        <AdminLayout title="Pendamping">
-            <Head title="Pendamping" />
+        <AdminLayout title="Fasilitator">
+            <Head title="Fasilitator" />
 
             <Breadcrumb
                 className="mb-4"
                 items={[
                     { href: route('dashboard'), title: <><HomeOutlined /> Dashboard</> },
                     { title: 'Master' },
-                    { title: 'Pendamping' },
+                    { title: 'Fasilitator' },
                 ]}
             />
 
@@ -184,7 +184,7 @@ export default function PendampingIndex({
                     <div className="flex flex-wrap items-center justify-between gap-3 py-1">
                         <Title level={5} className="!mb-0 !text-gray-800">
                             <TeamOutlined className="mr-2 text-emerald-500" />
-                            Daftar Pendamping
+                            Daftar Fasilitator
                         </Title>
                         <Space wrap>
                             <Input.Search
@@ -202,7 +202,7 @@ export default function PendampingIndex({
                                     icon={<PlusOutlined />}
                                     className="!border-emerald-500 !bg-emerald-500 hover:!bg-emerald-600"
                                 >
-                                    Tambah Pendamping
+                                    Tambah Fasilitator
                                 </Button>
                             </Link>
                         </Space>

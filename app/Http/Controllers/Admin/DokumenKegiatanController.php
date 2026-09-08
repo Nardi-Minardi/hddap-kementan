@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\DokumenKegiatan;
+use App\Models\SubMenuDokumen;
 use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,6 +18,7 @@ class DokumenKegiatanController extends Controller
     public function index(Request $request): Response
     {
         $query = DokumenKegiatan::query()
+            ->with('subMenu:id,nama')
             ->orderByDesc('urutan')
             ->orderByDesc('published_at')
             ->orderByDesc('id');
@@ -33,15 +35,22 @@ class DokumenKegiatanController extends Controller
             $query->where('is_published', $request->is_published === '1');
         }
 
+        if ($request->filled('sub_menu_dokumen_id')) {
+            $query->where('sub_menu_dokumen_id', $request->sub_menu_dokumen_id);
+        }
+
         return Inertia::render('Admin/DokumenKegiatan/Index', [
             'dokumen' => $query->paginate(10)->withQueryString(),
-            'filters' => $request->only('search', 'is_published'),
+            'filters' => $request->only('search', 'is_published', 'sub_menu_dokumen_id'),
+            'subMenuOptions' => $this->subMenuOptions(),
         ]);
     }
 
     public function create(): Response
     {
-        return Inertia::render('Admin/DokumenKegiatan/Create');
+        return Inertia::render('Admin/DokumenKegiatan/Create', [
+            'subMenuOptions' => $this->subMenuOptions(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -58,18 +67,19 @@ class DokumenKegiatanController extends Controller
 
         ActivityLogger::log(
             aksi: 'create',
-            deskripsi: "Membuat dokumen kegiatan: {$dokumen->judul}",
+            deskripsi: "Membuat dokumen: {$dokumen->judul}",
             subject: $dokumen,
         );
 
         return redirect()->route('admin.dokumen-kegiatan.index')
-            ->with('success', 'Dokumen kegiatan berhasil ditambahkan.');
+            ->with('success', 'Dokumen berhasil ditambahkan.');
     }
 
     public function edit(DokumenKegiatan $dokumenKegiatan): Response
     {
         return Inertia::render('Admin/DokumenKegiatan/Edit', [
             'dokumen' => $dokumenKegiatan,
+            'subMenuOptions' => $this->subMenuOptions(),
         ]);
     }
 
@@ -96,12 +106,12 @@ class DokumenKegiatanController extends Controller
 
         ActivityLogger::log(
             aksi: 'update',
-            deskripsi: "Memperbarui dokumen kegiatan: {$dokumenKegiatan->judul}",
+            deskripsi: "Memperbarui dokumen: {$dokumenKegiatan->judul}",
             subject: $dokumenKegiatan,
         );
 
         return redirect()->route('admin.dokumen-kegiatan.index')
-            ->with('success', 'Dokumen kegiatan berhasil diperbarui.');
+            ->with('success', 'Dokumen berhasil diperbarui.');
     }
 
     public function destroy(DokumenKegiatan $dokumenKegiatan): RedirectResponse
@@ -113,11 +123,26 @@ class DokumenKegiatanController extends Controller
 
         ActivityLogger::log(
             aksi: 'delete',
-            deskripsi: "Menghapus dokumen kegiatan: {$judul}",
+            deskripsi: "Menghapus dokumen: {$judul}",
         );
 
         return redirect()->route('admin.dokumen-kegiatan.index')
-            ->with('success', 'Dokumen kegiatan berhasil dihapus.');
+            ->with('success', 'Dokumen berhasil dihapus.');
+    }
+
+    /** @return list<array{value: int, label: string}> */
+    private function subMenuOptions(): array
+    {
+        return SubMenuDokumen::query()
+            ->where('is_active', true)
+            ->orderByDesc('urutan')
+            ->orderBy('nama')
+            ->get(['id', 'nama'])
+            ->map(fn (SubMenuDokumen $item) => [
+                'value' => $item->id,
+                'label' => $item->nama,
+            ])
+            ->all();
     }
 
     /** @return array<string, mixed> */
@@ -129,6 +154,7 @@ class DokumenKegiatanController extends Controller
 
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
+            'sub_menu_dokumen_id' => 'required|integer|exists:m_sub_menu_dokumen,id',
             'deskripsi' => 'nullable|string|max:1000',
             'file' => $fileRule,
             'cover' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:4096',
@@ -139,6 +165,7 @@ class DokumenKegiatanController extends Controller
             'file.required' => 'File PDF wajib diupload.',
             'file.mimes' => 'File harus berformat PDF.',
             'file.max' => 'Ukuran file PDF maksimal 20 MB.',
+            'sub_menu_dokumen_id.required' => 'Sub menu dokumen wajib dipilih.',
         ]);
 
         $validated['is_published'] = (bool) ($validated['is_published'] ?? false);
