@@ -7,11 +7,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::table('pendamping')
+        DB::table('m_pendamping')
             ->whereRaw("lower(trim(gender)) in ('laki-laki', 'laki laki', 'l')")
             ->update(['gender' => 'L']);
 
-        DB::table('pendamping')
+        DB::table('m_pendamping')
             ->whereRaw("lower(trim(gender)) in ('perempuan', 'p')")
             ->update(['gender' => 'P']);
     }

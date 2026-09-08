@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Pendamping extends Model
 {
-    protected $table = 'pendamping';
+    protected $table = 'm_pendamping';
 
     protected $primaryKey = 'no';
 
