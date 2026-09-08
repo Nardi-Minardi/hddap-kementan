@@ -13,7 +13,7 @@ return new class extends Migration
         }
 
         Schema::create('tr_jns_pelatihan', function (Blueprint $table) {
-            $table->string('kdjenis', 10)->primary();
+            $table->increments('kdjenis');
             $table->string('jenis_pelatihan', 100);
             $table->string('nama_pelatihan', 100);
         });

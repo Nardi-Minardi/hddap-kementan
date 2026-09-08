@@ -1,0 +1,144 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: hddap-kementan/Dockerfile
+    image: hddap-app:latest
+    container_name: hddap-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_URL: ${APP_URL:-https://hddap.cloud}
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE:-hddap}
+      DB_USERNAME: ${DB_USERNAME:-hddap}
+      DB_PASSWORD: ${DB_PASSWORD:-hddap@2026}
+      RUN_SETUP: "true"
+      RUN_MIGRATIONS: "false"
+    volumes:
+      - app_data:/var/www/html
+      - ./hddap-kementan/storage:/var/www/html/storage
+      - ./.env:/var/www/html/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "php /var/www/html/artisan --version >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    networks:
+      - hddap
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: hddap-nginx
+    restart: unless-stopped
+    ports:
+      - "${APP_HTTP_PORT:-8080}:80"
+    volumes:
+      - app_data:/var/www/html:ro
+      - ./hddap-kementan/storage:/var/www/html/storage:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    networks:
+      - hddap
+
+  queue:
+    image: hddap-app:latest
+    container_name: hddap-queue
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_URL: ${APP_URL:-https://hddap.cloud}
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE:-hddap}
+      DB_USERNAME: ${DB_USERNAME:-hddap}
+      DB_PASSWORD: ${DB_PASSWORD:-hddap@2026}
+      RUN_SETUP: "false"
+      RUN_MIGRATIONS: "false"
+    command: php artisan queue:work --sleep=3 --tries=3 --timeout=300
+    volumes:
+      - app_data:/var/www/html
+      - ./hddap-kementan/storage:/var/www/html/storage
+      - ./.env:/var/www/html/.env
+    depends_on:
+      app:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - hddap
+
+  scheduler:
+    image: hddap-app:latest
+    container_name: hddap-scheduler
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_URL: ${APP_URL:-https://hddap.cloud}
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE:-hddap}
+      DB_USERNAME: ${DB_USERNAME:-hddap}
+      DB_PASSWORD: ${DB_PASSWORD:-hddap@2026}
+      RUN_SETUP: "false"
+      RUN_MIGRATIONS: "false"
+    command: sh -c "while true; do php artisan schedule:run --verbose --no-interaction; sleep 60; done"
+    volumes:
+      - app_data:/var/www/html
+      - ./hddap-kementan/storage:/var/www/html/storage
+      - ./.env:/var/www/html/.env
+    depends_on:
+      app:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - hddap
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: hddap-postgres
+    restart: unless-stopped
+    ports:
+      - "${DB_EXTERNAL_PORT:-5432}:5432"
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-hddap}
+      POSTGRES_USER: ${DB_USERNAME:-hddap}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-hddap@2026}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-hddap} -d ${DB_DATABASE:-hddap}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - hddap
+
+volumes:
+  app_data:
+  postgres_data:
+
+networks:
+  hddap:
+    external: true
+    name: hddap

@@ -1,0 +1,20 @@
+services:
+  reverse-proxy:
+    image: nginx:1.27-alpine
+    container_name: hddap-reverse-proxy
+    restart: unless-stopped
+    ports:
+      - "${PROXY_HTTP_PORT:-80}:80"
+      - "${PROXY_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./conf.d:/etc/nginx/conf.d:ro
+      - ./certs:/etc/nginx/certs:ro
+      - ./certbot/www:/var/www/certbot:ro
+    networks:
+      - hddap
+
+networks:
+  hddap:
+    external: true
+    name: hddap
