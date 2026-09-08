@@ -17,6 +17,7 @@
         "summary": "List Logframe",
         "description": "Mengembalikan daftar indikator logframe. Mendukung pencarian, pagination, dan sorting.",
         "operationId": "getLogframeList",
+        "tags": ["Logframe"],
         "parameters": [
           {
             "name": "search",
@@ -158,6 +159,332 @@
               }
             }
           }
+        }
+      }
+    },
+    "/petani": {
+      "get": {
+        "summary": "List Petani",
+        "description": "Mengembalikan daftar data petani (`m_petani`). Mendukung pencarian, filter, pagination, dan sorting.",
+        "operationId": "getPetaniList",
+        "tags": ["Petani"],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Kata kunci pencarian di nama, NIK, no HP, alamat, gender, tahap, kelas lereng, dan fungsi kawasan hutan",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 255,
+              "nullable": true
+            },
+            "example": "budi"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Jumlah data per halaman (maksimum 100)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            },
+            "example": 10
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Posisi awal data untuk pagination",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "example": 0
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "description": "Kolom pengurutan data",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "id",
+              "enum": [
+                "id",
+                "nama_petani",
+                "nik_petani",
+                "no_hp_petani",
+                "gender_petani",
+                "usia_petani",
+                "difabel",
+                "kode_kota",
+                "kode_poktan",
+                "jmlah_petani",
+                "luas_lahan_ha",
+                "latitude",
+                "longitude",
+                "kelas_lereng",
+                "kemiringan",
+                "fungsi_kws_hutan",
+                "tahap",
+                "created_at",
+                "updated_at"
+              ]
+            },
+            "example": "id"
+          },
+          {
+            "name": "order_direction",
+            "in": "query",
+            "description": "Arah pengurutan: ascending atau descending",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "asc",
+              "enum": ["asc", "desc"]
+            },
+            "example": "asc"
+          },
+          {
+            "name": "gender_petani",
+            "in": "query",
+            "description": "Filter gender petani",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["L", "P"],
+              "nullable": true
+            },
+            "example": "P"
+          },
+          {
+            "name": "kode_kota",
+            "in": "query",
+            "description": "Filter berdasarkan kode kabupaten/kota",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "nullable": true
+            },
+            "example": 3201
+          },
+          {
+            "name": "kode_poktan",
+            "in": "query",
+            "description": "Filter berdasarkan ID kelompok tani (m_poktan)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "nullable": true
+            },
+            "example": 12
+          },
+          {
+            "name": "tahap",
+            "in": "query",
+            "description": "Filter berdasarkan tahap intervensi",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 50,
+              "nullable": true
+            },
+            "example": "1"
+          },
+          {
+            "name": "difabel",
+            "in": "query",
+            "description": "Filter status difabel",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "nullable": true
+            },
+            "example": false
+          },
+          {
+            "name": "dukungan_proyek",
+            "in": "query",
+            "description": "Filter petani dukungan proyek (`jmlah_petani = 1`)",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "nullable": true
+            },
+            "example": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Berhasil — daftar petani dikembalikan dalam field `data`, informasi pagination di `meta`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetaniListResponse"
+                },
+                "examples": {
+                  "success": {
+                    "summary": "Response sukses",
+                    "value": {
+                      "status_code": 200,
+                      "message": "Success",
+                      "data": [
+                        {
+                          "id": 1,
+                          "nama_petani": "Budi Santoso",
+                          "nik_petani": "3201010101010001",
+                          "no_hp_petani": "081234567890",
+                          "gender_petani": "L",
+                          "usia_petani": 35,
+                          "difabel": false,
+                          "alamat_petani": "Desa Sukamaju",
+                          "jmlah_petani": 1,
+                          "luas_lahan_ha": 0.5,
+                          "latitude": -6.914744,
+                          "longitude": 107.60981,
+                          "kelas_lereng": "Datar",
+                          "kemiringan": "0-8%",
+                          "fungsi_kws_hutan": "Bukan Kawasan Hutan",
+                          "tahap": "1",
+                          "kode_poktan": 12,
+                          "kode_kota": 3201,
+                          "foto_lahan": null,
+                          "poktan": {
+                            "id": 12,
+                            "nama_poktan": "Kelompok Tani Makmur",
+                            "kode_cluster": 3
+                          },
+                          "kab_kota": {
+                            "code": "3201",
+                            "name": "Kab. Bogor"
+                          },
+                          "created_at": "2026-06-25 10:00:00",
+                          "updated_at": "2026-06-25 10:00:00"
+                        }
+                      ],
+                      "meta": {
+                        "total": 150,
+                        "limit": 10,
+                        "offset": 0,
+                        "order_by": "id",
+                        "order_direction": "asc",
+                        "search": null,
+                        "filters": {
+                          "gender_petani": null,
+                          "kode_kota": null,
+                          "kode_poktan": null,
+                          "tahap": null,
+                          "difabel": null,
+                          "dukungan_proyek": null
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validasi gagal — parameter request tidak memenuhi aturan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/wilayah": {
+      "get": {
+        "summary": "Wilayah Lengkap",
+        "description": "Data wilayah administratif: provinsi → kab/kota → kecamatan → kelurahan/desa. Default format **nested** (hierarki lengkap). Gunakan `format=flat` + `level` untuk daftar per level dengan pagination.",
+        "operationId": "getWilayah",
+        "tags": ["Wilayah"],
+        "parameters": [
+          { "name": "format", "in": "query", "schema": { "type": "string", "enum": ["nested", "flat"], "default": "nested" } },
+          { "name": "level", "in": "query", "schema": { "type": "string", "enum": ["provinsi", "kab_kota", "kecamatan", "kel_des"], "nullable": true } },
+          { "name": "provinsi_code", "in": "query", "schema": { "type": "string", "nullable": true } },
+          { "name": "kab_kota_code", "in": "query", "schema": { "type": "string", "nullable": true } },
+          { "name": "kecamatan_code", "in": "query", "schema": { "type": "string", "nullable": true } },
+          { "name": "search", "in": "query", "schema": { "type": "string", "maxLength": 255, "nullable": true } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 10 } },
+          { "name": "offset", "in": "query", "schema": { "type": "integer", "minimum": 0, "default": 0 } },
+          { "name": "order_by", "in": "query", "schema": { "type": "string", "default": "code", "enum": ["code", "name"] } },
+          { "name": "order_direction", "in": "query", "schema": { "type": "string", "default": "asc", "enum": ["asc", "desc"] } }
+        ],
+        "responses": {
+          "200": { "description": "Berhasil", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WilayahResponse" } } } },
+          "422": { "description": "Validasi gagal", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" } } } }
+        }
+      }
+    },
+    "/poktan": {
+      "get": {
+        "summary": "List Poktan",
+        "description": "Daftar kelompok tani (`m_poktan`) dengan relasi cluster dan kab/kota.",
+        "operationId": "getPoktanList",
+        "tags": ["Poktan"],
+        "parameters": [
+          { "name": "search", "in": "query", "schema": { "type": "string", "maxLength": 255, "nullable": true } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 10 } },
+          { "name": "offset", "in": "query", "schema": { "type": "integer", "minimum": 0, "default": 0 } },
+          { "name": "order_by", "in": "query", "schema": { "type": "string", "default": "id", "enum": ["id", "nama_poktan", "ketua", "telp", "kode_kota", "kode_cluster", "gender_lp"] } },
+          { "name": "order_direction", "in": "query", "schema": { "type": "string", "default": "asc", "enum": ["asc", "desc"] } },
+          { "name": "kode_kota", "in": "query", "schema": { "type": "integer", "nullable": true } },
+          { "name": "kode_cluster", "in": "query", "schema": { "type": "integer", "nullable": true } }
+        ],
+        "responses": {
+          "200": { "description": "Berhasil", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PoktanListResponse" } } } },
+          "422": { "description": "Validasi gagal", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" } } } }
+        }
+      }
+    },
+    "/cluster": {
+      "get": {
+        "summary": "List Cluster",
+        "description": "Daftar cluster petani (`m_cluster`) dengan relasi komoditas dan kab/kota.",
+        "operationId": "getClusterList",
+        "tags": ["Cluster"],
+        "parameters": [
+          { "name": "search", "in": "query", "schema": { "type": "string", "maxLength": 255, "nullable": true } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 10 } },
+          { "name": "offset", "in": "query", "schema": { "type": "integer", "minimum": 0, "default": 0 } },
+          { "name": "order_by", "in": "query", "schema": { "type": "string", "default": "id", "enum": ["id", "nama_cluster", "nama_kota", "kode_kota", "kode_kumoditas"] } },
+          { "name": "order_direction", "in": "query", "schema": { "type": "string", "default": "asc", "enum": ["asc", "desc"] } },
+          { "name": "kode_kota", "in": "query", "schema": { "type": "integer", "nullable": true } },
+          { "name": "kode_kumoditas", "in": "query", "schema": { "type": "integer", "nullable": true } }
+        ],
+        "responses": {
+          "200": { "description": "Berhasil", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ClusterListResponse" } } } },
+          "422": { "description": "Validasi gagal", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" } } } }
+        }
+      }
+    },
+    "/kumoditas": {
+      "get": {
+        "summary": "List Kumoditas",
+        "description": "Daftar komoditas (`m_kumoditas`) dengan relasi jenis komoditas.",
+        "operationId": "getKumoditasList",
+        "tags": ["Kumoditas"],
+        "parameters": [
+          { "name": "search", "in": "query", "schema": { "type": "string", "maxLength": 255, "nullable": true } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 10 } },
+          { "name": "offset", "in": "query", "schema": { "type": "integer", "minimum": 0, "default": 0 } },
+          { "name": "order_by", "in": "query", "schema": { "type": "string", "default": "id", "enum": ["id", "kumoditas", "kodejns", "keterangan"] } },
+          { "name": "order_direction", "in": "query", "schema": { "type": "string", "default": "asc", "enum": ["asc", "desc"] } },
+          { "name": "kodejns", "in": "query", "schema": { "type": "integer", "nullable": true } }
+        ],
+        "responses": {
+          "200": { "description": "Berhasil", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/KumoditasListResponse" } } } },
+          "422": { "description": "Validasi gagal", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" } } } }
         }
       }
     }
@@ -302,6 +629,158 @@
           "meta": {
             "$ref": "#/components/schemas/LogframeListMeta"
           }
+        }
+      },
+      "PetaniKabKota": {
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "code": { "type": "string", "example": "3201" },
+          "name": { "type": "string", "example": "Kab. Bogor" }
+        }
+      },
+      "PetaniPoktan": {
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "id": { "type": "integer", "example": 12 },
+          "nama_poktan": { "type": "string", "example": "Kelompok Tani Makmur" },
+          "kode_cluster": { "type": "integer", "example": 3 }
+        }
+      },
+      "PetaniItem": {
+        "type": "object",
+        "description": "Satu record petani dari tabel m_petani",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "nama_petani": { "type": "string", "example": "Budi Santoso" },
+          "nik_petani": { "type": "string", "nullable": true, "example": "3201010101010001" },
+          "no_hp_petani": { "type": "string", "nullable": true, "example": "081234567890" },
+          "gender_petani": { "type": "string", "nullable": true, "enum": ["L", "P"], "example": "L" },
+          "usia_petani": { "type": "integer", "nullable": true, "example": 35 },
+          "difabel": { "type": "boolean", "example": false },
+          "alamat_petani": { "type": "string", "nullable": true },
+          "jmlah_petani": { "type": "integer", "nullable": true, "example": 1 },
+          "luas_lahan_ha": { "type": "number", "format": "float", "nullable": true, "example": 0.5 },
+          "latitude": { "type": "number", "format": "float", "nullable": true, "example": -6.914744 },
+          "longitude": { "type": "number", "format": "float", "nullable": true, "example": 107.60981 },
+          "kelas_lereng": { "type": "string", "nullable": true },
+          "kemiringan": { "type": "string", "nullable": true },
+          "fungsi_kws_hutan": { "type": "string", "nullable": true },
+          "tahap": { "type": "string", "nullable": true, "example": "1" },
+          "kode_poktan": { "type": "integer", "nullable": true, "example": 12 },
+          "kode_kota": { "type": "integer", "nullable": true, "example": 3201 },
+          "foto_lahan": { "type": "string", "nullable": true, "description": "URL publik foto lahan", "example": null },
+          "poktan": { "$ref": "#/components/schemas/PetaniPoktan" },
+          "kab_kota": { "$ref": "#/components/schemas/PetaniKabKota" },
+          "created_at": { "type": "string", "format": "date-time", "nullable": true },
+          "updated_at": { "type": "string", "format": "date-time", "nullable": true }
+        }
+      },
+      "PetaniListMeta": {
+        "type": "object",
+        "description": "Metadata pagination, sorting, dan filter petani",
+        "properties": {
+          "total": { "type": "integer", "example": 150 },
+          "limit": { "type": "integer", "example": 10 },
+          "offset": { "type": "integer", "example": 0 },
+          "order_by": { "type": "string", "example": "id" },
+          "order_direction": { "type": "string", "enum": ["asc", "desc"], "example": "asc" },
+          "search": { "type": "string", "nullable": true, "example": null },
+          "filters": {
+            "type": "object",
+            "properties": {
+              "gender_petani": { "type": "string", "nullable": true, "enum": ["L", "P"] },
+              "kode_kota": { "type": "integer", "nullable": true },
+              "kode_poktan": { "type": "integer", "nullable": true },
+              "tahap": { "type": "string", "nullable": true },
+              "difabel": { "type": "boolean", "nullable": true },
+              "dukungan_proyek": { "type": "boolean", "nullable": true }
+            }
+          }
+        }
+      },
+      "PetaniListResponse": {
+        "type": "object",
+        "description": "Response standar daftar petani",
+        "properties": {
+          "status_code": { "type": "integer", "example": 200 },
+          "message": { "type": "string", "example": "Success" },
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/PetaniItem" }
+          },
+          "meta": { "$ref": "#/components/schemas/PetaniListMeta" }
+        }
+      },
+      "WilayahResponse": {
+        "type": "object",
+        "properties": {
+          "status_code": { "type": "integer", "example": 200 },
+          "message": { "type": "string", "example": "Success" },
+          "data": { "type": "array", "items": { "type": "object" } },
+          "meta": { "type": "object" }
+        }
+      },
+      "PoktanItem": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "nama_poktan": { "type": "string" },
+          "ketua": { "type": "string", "nullable": true },
+          "telp": { "type": "string", "nullable": true },
+          "alamat": { "type": "string", "nullable": true },
+          "gender_lp": { "type": "string", "nullable": true },
+          "kode_kota": { "type": "integer", "nullable": true },
+          "kode_cluster": { "type": "integer", "nullable": true },
+          "jumlah_petani": { "type": "integer" }
+        }
+      },
+      "PoktanListResponse": {
+        "type": "object",
+        "properties": {
+          "status_code": { "type": "integer", "example": 200 },
+          "message": { "type": "string", "example": "Success" },
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/PoktanItem" } },
+          "meta": { "$ref": "#/components/schemas/LogframeListMeta" }
+        }
+      },
+      "ClusterItem": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "nama_cluster": { "type": "string" },
+          "nama_kota": { "type": "string", "nullable": true },
+          "kode_kota": { "type": "integer", "nullable": true },
+          "kode_kumoditas": { "type": "integer", "nullable": true },
+          "jumlah_poktan": { "type": "integer" }
+        }
+      },
+      "ClusterListResponse": {
+        "type": "object",
+        "properties": {
+          "status_code": { "type": "integer", "example": 200 },
+          "message": { "type": "string", "example": "Success" },
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/ClusterItem" } },
+          "meta": { "$ref": "#/components/schemas/LogframeListMeta" }
+        }
+      },
+      "KumoditasItem": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "kumoditas": { "type": "string" },
+          "kodejns": { "type": "integer", "nullable": true },
+          "keterangan": { "type": "string", "nullable": true }
+        }
+      },
+      "KumoditasListResponse": {
+        "type": "object",
+        "properties": {
+          "status_code": { "type": "integer", "example": 200 },
+          "message": { "type": "string", "example": "Success" },
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/KumoditasItem" } },
+          "meta": { "$ref": "#/components/schemas/LogframeListMeta" }
         }
       },
       "ValidationErrorResponse": {

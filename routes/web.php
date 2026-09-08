@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [WelcomeController::class, 'index']);
 
-Route::get('/api/documentation', [ApiDocumentationController::class, 'ui'])->name('api.documentation');
+Route::get('/api/docs', [ApiDocumentationController::class, 'ui'])->name('api.docs');
+Route::redirect('/api/documentation', '/api/docs');
 Route::get('/api/docs/openapi.json', [ApiDocumentationController::class, 'spec'])->name('api.openapi');
 
 Route::get('/logframe', [LogframeController::class, 'index'])->name('logframe');

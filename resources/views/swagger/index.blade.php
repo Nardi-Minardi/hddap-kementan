@@ -12,7 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
     <script>
         Scalar.createApiReference('#app', {
-            url: '/api-docs/openapi.json',
+            url: '/api/docs/openapi.json',
             layout: 'modern',
             hideModels: true,
             hideDownloadButton: true,
