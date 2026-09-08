@@ -18,13 +18,17 @@ class Petani extends Model
         'usia_petani',
         'difabel',
         'alamat_petani',
-        'Latitude',
-        'Longitude',
-        'foto_lahan',
-        'kode_kota',
-        'kode_poktan',
         'jmlah_petani',
-        'Tahap',
+        'luas_lahan_ha',
+        'latitude',
+        'longitude',
+        'kelas_lereng',
+        'kemiringan',
+        'fungsi_kws_hutan',
+        'tahap',
+        'kode_poktan',
+        'kode_kota',
+        'foto_lahan'
     ];
 
     protected $casts = [
@@ -32,8 +36,9 @@ class Petani extends Model
         'kode_kota' => 'integer',
         'kode_poktan' => 'integer',
         'jmlah_petani' => 'integer',
-        'Latitude' => 'float',
-        'Longitude' => 'float',
+        'luas_lahan_ha' => 'float',
+        'latitude' => 'float',
+        'longitude' => 'float',
     ];
 
     public function kkPetani(): HasMany
@@ -54,8 +59,8 @@ class Petani extends Model
     public function scopeWithCoordinates($query)
     {
         return $query
-            ->whereNotNull('Latitude')
-            ->whereNotNull('Longitude');
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude');
     }
 
     public function scopeDukunganProyek($query)

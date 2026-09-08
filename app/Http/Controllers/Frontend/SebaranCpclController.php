@@ -52,7 +52,7 @@ class SebaranCpclController extends Controller
     public function show(Petani $petani): JsonResponse
     {
         abort_unless(
-            is_numeric($petani->Latitude) && is_numeric($petani->Longitude),
+            is_numeric($petani->latitude) && is_numeric($petani->longitude),
             404,
         );
 

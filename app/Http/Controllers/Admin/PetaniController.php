@@ -293,8 +293,8 @@ class PetaniController extends Controller
             'kode_kota'     => ($scope->isPusat() ? 'required' : 'nullable').'|integer|exists:m_kab_kota,code',
             'kode_cluster'  => 'required|integer|exists:m_cluster,id',
             'kode_poktan'   => 'required|integer|exists:m_poktan,id',
-            'Latitude'      => 'nullable|numeric|between:-90,90',
-            'Longitude'     => 'nullable|numeric|between:-180,180',
+            'latitude'      => 'nullable|numeric|between:-90,90',
+            'longitude'     => 'nullable|numeric|between:-180,180',
             'foto_lahan'    => 'nullable|image|mimes:jpeg,jpg,png,webp|max:4096',
         ]);
 

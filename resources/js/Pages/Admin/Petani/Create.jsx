@@ -22,8 +22,8 @@ export default function PetaniCreate({
         kode_kota: defaultKodeKota ?? null,
         kode_cluster: null,
         kode_poktan: null,
-        Latitude: null,
-        Longitude: null,
+        latitude: null,
+        longitude: null,
         foto_lahan: null,
     });
 

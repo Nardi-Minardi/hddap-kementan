@@ -36,8 +36,8 @@ export default function PetaniEdit({
         kode_kota: petani.kode_kota ?? petani.poktan?.kode_kota ?? defaultKodeKota ?? null,
         kode_cluster: petani.poktan?.kode_cluster ?? null,
         kode_poktan: petani.kode_poktan ?? null,
-        Latitude: parseCoordinate(petani.Latitude ?? petani.latitude),
-        Longitude: parseCoordinate(petani.Longitude ?? petani.longitude),
+        latitude: parseCoordinate(petani.latitude),
+        longitude: parseCoordinate(petani.longitude),
         foto_lahan: null,
     });
 

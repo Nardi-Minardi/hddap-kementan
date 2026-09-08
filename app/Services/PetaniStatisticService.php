@@ -18,9 +18,9 @@ class PetaniStatisticService
 
     private const ANGGOTA_PER_HH = 5;
 
-    private const LUAS_LAHAN_COLUMN = 'Luas Lahan (Ha)';
+    private const LUAS_LAHAN_COLUMN = 'luas_lahan_ha';
 
-    private const TAHAP_COLUMN = 'Tahap';
+    private const TAHAP_COLUMN = 'tahap';
 
     private ?string $tahap = null;
 

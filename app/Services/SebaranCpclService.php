@@ -59,8 +59,8 @@ class SebaranCpclService
 
     public function mapPoint(object $petani): ?array
     {
-        $lat = is_numeric($petani->Latitude) ? (float) $petani->Latitude : null;
-        $lng = is_numeric($petani->Longitude) ? (float) $petani->Longitude : null;
+        $lat = is_numeric($petani->latitude) ? (float) $petani->latitude : null;
+        $lng = is_numeric($petani->longitude) ? (float) $petani->longitude : null;
 
         if ($lat === null || $lng === null) {
             return null;
@@ -110,8 +110,8 @@ class SebaranCpclService
             ->select([
                 'm_petani.id',
                 'm_petani.kode_kota',
-                'm_petani.Latitude',
-                'm_petani.Longitude',
+                'm_petani.latitude',
+                'm_petani.longitude',
                 DB::raw('jk.id as jenis_kumoditas_id'),
             ])
             ->join('m_poktan as pt', 'm_petani.kode_poktan', '=', 'pt.id')
@@ -153,12 +153,12 @@ class SebaranCpclService
             'gender_petani' => 'Gender',
             'difabel' => 'Difabel',
             'alamat_petani' => 'Alamat',
-            'Luas Lahan (Ha)' => 'Luas Lahan',
-            'Kelas Lereng' => 'Kelas Lereng',
-            'Kemiringan' => 'Kemiringan',
-            'Fungsi Kws. Hutan' => 'Fungsi Kawasan Hutan',
-            'Latitude' => 'Latitude',
-            'Longitude' => 'Longitude',
+            'luas_lahan_ha' => 'Luas Lahan',
+            'kelas_lereng' => 'Kelas Lereng',
+            'kemiringan' => 'Kemiringan',
+            'fungsi_kws_hutan' => 'Fungsi Kawasan Hutan',
+            'latitude' => 'Latitude',
+            'longitude' => 'Longitude',
         ];
 
         $rows = [];

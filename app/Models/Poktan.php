@@ -13,6 +13,7 @@ class Poktan extends Model
 
     public $timestamps = false;
 
+    
     protected $fillable = [
         'kode_kota',
         'kode_cluster',
@@ -20,6 +21,7 @@ class Poktan extends Model
         'ketua',
         'telp',
         'alamat',
+        'gender_lp'
     ];
 
     protected $casts = [

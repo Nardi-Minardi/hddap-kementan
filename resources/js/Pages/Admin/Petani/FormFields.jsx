@@ -134,8 +134,8 @@ export default function PetaniFormFields({
         : existingFotoUrl;
 
     const handleCoordinateChange = (latitude, longitude) => {
-        setData('Latitude', latitude);
-        setData('Longitude', longitude);
+        setData('latitude', latitude);
+        setData('longitude', longitude);
     };
 
     return (
@@ -345,8 +345,8 @@ export default function PetaniFormFields({
                 <Col xs={24} lg={10}>
                     <Form.Item
                         label="Latitude"
-                        validateStatus={errors.Latitude ? 'error' : ''}
-                        help={errors.Latitude || 'Kolom Latitude pada tabel m_petani.'}
+                        validateStatus={errors.latitude ? 'error' : ''}
+                        help={errors.latitude || 'Kolom latitude pada tabel m_petani.'}
                     >
                         <InputNumber
                             className="w-full"
@@ -354,16 +354,16 @@ export default function PetaniFormFields({
                             step={0.000001}
                             min={-90}
                             max={90}
-                            value={data.Latitude}
-                            onChange={(val) => setData('Latitude', val)}
+                            value={data.latitude}
+                            onChange={(val) => setData('latitude', val)}
                             placeholder="Contoh: -6.914744"
                         />
                     </Form.Item>
 
                     <Form.Item
                         label="Longitude"
-                        validateStatus={errors.Longitude ? 'error' : ''}
-                        help={errors.Longitude || 'Kolom Longitude pada tabel m_petani.'}
+                        validateStatus={errors.longitude ? 'error' : ''}
+                        help={errors.longitude || 'Kolom longitude pada tabel m_petani.'}
                     >
                         <InputNumber
                             className="w-full"
@@ -371,8 +371,8 @@ export default function PetaniFormFields({
                             step={0.000001}
                             min={-180}
                             max={180}
-                            value={data.Longitude}
-                            onChange={(val) => setData('Longitude', val)}
+                            value={data.longitude}
+                            onChange={(val) => setData('longitude', val)}
                             placeholder="Contoh: 107.609810"
                         />
                     </Form.Item>
@@ -381,8 +381,8 @@ export default function PetaniFormFields({
                 <Col xs={24} lg={14}>
                     <Form.Item label="Peta Lokasi Lahan">
                         <CoordinateMapPicker
-                            latitude={parseCoordinate(data.Latitude)}
-                            longitude={parseCoordinate(data.Longitude)}
+                            latitude={parseCoordinate(data.latitude)}
+                            longitude={parseCoordinate(data.longitude)}
                             onChange={handleCoordinateChange}
                         />
                     </Form.Item>
